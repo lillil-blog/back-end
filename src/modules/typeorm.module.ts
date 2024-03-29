@@ -20,12 +20,8 @@ import { UserEntity } from 'src/domain/user/repository/user.entity';
         })
     ]
 })
-export class TypeOrmModule {
-    constructor() {
-        console.log(process.env.DB_HOST);
-        console.log(process.env.DB_PORT);
-        console.log(process.env.DB_USER);
-        console.log(process.env.DB_PASSWORD);
-        console.log(process.env.DB_DATABASE);
-    }
-}
+export class TypeOrmModule {}
+
+/**
+ * @TODO DB연결정보 환경변수로 변경
+ */
