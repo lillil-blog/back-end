@@ -12,6 +12,9 @@ export class UserEntity {
     password: string;
 
     @Column()
+    nickname: string;
+
+    @Column()
     thumbnail: string;
 
     @Column()
