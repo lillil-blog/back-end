@@ -16,7 +16,7 @@ import { UserEntity } from 'src/domain/user/repository/user.entity';
             database: 'dstb',
             entities: [UserEntity, BoardEntity, BoardLikeEntity, TagEntity],
             synchronize: true, // 재시작 시 테이블 구조 항상 동기화
-            logging: true // DB작업 콘솔에 로그 출력
+            logging: false // DB작업 콘솔에 로그 출력
         })
     ]
 })
