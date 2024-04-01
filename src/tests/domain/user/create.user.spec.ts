@@ -5,7 +5,7 @@ import { UserService } from 'src/domain/user/service/user.service';
 import { UserModule } from 'src/modules/domain/user.module';
 import { TypeOrmModule } from 'src/modules/typeorm.module';
 
-describe('create.user.test', () => {
+describe('create.user.spec', () => {
     let app: INestApplication;
     let service: UserService;
 
