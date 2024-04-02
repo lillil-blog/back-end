@@ -14,4 +14,8 @@ export class BoardService {
     async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity> {
         return await this.boardRepository.save(boardDTO);
     }
+
+    async deleteBoard(board_no: number): Promise<object> {
+        return await this.boardRepository.delete(board_no);
+    }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from './board.entity';
 import { Repository } from 'typeorm';
@@ -25,5 +25,20 @@ export class BoardRepository {
         });
 
         return await this.boardRepository.save(boardEntity);
+    }
+
+    /**
+     * board테이블의 PK를 받아와 해당 글번호의 포스트를 삭제하도록 한다.
+     */
+    async delete(board_no: number) {
+        const boardEntity = await this.boardRepository.findOne({
+            where: { board_no: board_no }
+        });
+
+        if (!boardEntity) {
+            throw new NotFoundException('Post not found!');
+        }
+
+        return this.boardRepository.delete({ board_no });
     }
 }

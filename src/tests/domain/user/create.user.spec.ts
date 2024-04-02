@@ -25,18 +25,14 @@ describe('create.user.spec', () => {
     });
 
     it('should create a new user', async () => {
-        try {
-            const createUserDTO: CreateUserDTO = {
-                id: 'test6',
-                password: 'test',
-                nickname: '테스트닉네임',
-                introduce: '테스트계정입니다.',
-                thumbnail: 'default_Thumbnail'
-            };
+        const createUserDTO: CreateUserDTO = {
+            id: 'test6',
+            password: 'test',
+            nickname: '테스트닉네임',
+            introduce: '테스트계정입니다.',
+            thumbnail: 'default_Thumbnail'
+        };
 
-            await service.createUser(createUserDTO);
-        } catch (error) {
-            fail(`User creation failed with error: ${error}`);
-        }
+        await expect(await service.createUser(createUserDTO)).rejects.toThrow();
     });
 });
