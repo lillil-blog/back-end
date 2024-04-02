@@ -5,7 +5,7 @@ export class TagEntity {
     @PrimaryGeneratedColumn()
     tag_no: number;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @CreateDateColumn()
