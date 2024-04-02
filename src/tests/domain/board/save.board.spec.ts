@@ -63,7 +63,7 @@ describe('save.board.spec', () => {
 
     it('정상적으로 업데이트가 되어야 함', async () => {
         const updateBoardDTO: UpdateBoardDTO = {
-            board_no: 1,
+            board_no: 10, //실제값
             title: '수정된제목',
             content: '수정된내용',
             category: '수정된카테고리',

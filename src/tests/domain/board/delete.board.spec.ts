@@ -24,7 +24,7 @@ describe('delete.board.spec', () => {
     });
 
     it('성공적으로 글이 지워져야함', async () => {
-        const board_no: number = 1;
+        const board_no: number = 4; //실제값
 
         expect(await service.deleteBoard(board_no));
     });
