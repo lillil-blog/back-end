@@ -1,4 +1,5 @@
 import { TagEntity } from 'src/domain/tag/repository/tag.entity';
+import { TagMappingEntity } from 'src/domain/tag/repository/tag.mapping.entity';
 import { UserEntity } from 'src/domain/user/repository/user.entity';
 import {
     Column,
@@ -8,6 +9,7 @@ import {
     JoinTable,
     ManyToMany,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
@@ -42,11 +44,14 @@ export class BoardEntity {
     @JoinColumn({ name: 'writer', referencedColumnName: 'id' })
     writer: UserEntity;
 
-    @ManyToMany(() => TagEntity)
-    @JoinTable({
-        name: 'tag_mapping',
-        joinColumn: { name: 'board_no', referencedColumnName: 'board_no' },
-        inverseJoinColumn: { name: 'tag_no', referencedColumnName: 'tag_no' }
-    })
-    tags: TagEntity[];
+    @OneToMany(() => TagMappingEntity, (tagMapping) => tagMapping.board)
+    tagMappings: TagMappingEntity[];
+
+    // @ManyToMany(() => TagEntity)
+    // @JoinTable({
+    //     name: 'tag_mapping',
+    //     joinColumn: { name: 'board_no', referencedColumnName: 'board_no' },
+    //     inverseJoinColumn: { name: 'tag_no', referencedColumnName: 'tag_no' }
+    // })
+    // tags: TagEntity[];
 }

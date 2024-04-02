@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from './board.entity';
 import { Repository } from 'typeorm';
@@ -32,7 +32,25 @@ export class BoardRepository {
      * @TODO 페이징, 검색기능 생각해서 추가할 것
      */
     async listAll(): Promise<BoardEntity[]> {
-        return this.boardRepository.find();
+        const list = await this.boardRepository.find({
+            relations: ['tagMappings', 'tagMappings.tag']
+        });
+
+        const resultList: Array<BoardEntity> = list.map((boardItem) => {
+            if (boardItem.tagMappings) {
+                const tagMappings = boardItem.tagMappings.map((tagItem) => ({
+                    ...tagItem,
+                    tag: tagItem.tag
+                }));
+                return {
+                    ...boardItem,
+                    tagMappings
+                };
+            }
+            return boardItem;
+        });
+
+        return resultList;
     }
 
     /**
@@ -40,8 +58,17 @@ export class BoardRepository {
      */
     async read(board_no: number): Promise<BoardEntity> {
         const boardEntity = await this.boardRepository.findOne({
-            where: { board_no: board_no }
+            where: { board_no: board_no },
+            relations: ['tagMappings', 'tagMappings.tag']
         });
+
+        // 태그맵핑 안의 객체의 배열을 풀어서 보기좋게 만들도록 출력 형식 조정
+        if (boardEntity && boardEntity.tagMappings) {
+            boardEntity.tagMappings = boardEntity.tagMappings.map((item) => ({
+                tag: item.tag,
+                ...item
+            }));
+        }
 
         return boardEntity;
     }

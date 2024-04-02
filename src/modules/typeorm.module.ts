@@ -3,6 +3,7 @@ import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
 import { BoardEntity } from 'src/domain/board/repository/board.entity';
 import { BoardLikeEntity } from 'src/domain/board/repository/board.like.entity';
 import { TagEntity } from 'src/domain/tag/repository/tag.entity';
+import { TagMappingEntity } from 'src/domain/tag/repository/tag.mapping.entity';
 import { UserEntity } from 'src/domain/user/repository/user.entity';
 
 @Module({
@@ -14,7 +15,7 @@ import { UserEntity } from 'src/domain/user/repository/user.entity';
             username: 'master',
             password: 'Master3306!',
             database: 'dstb',
-            entities: [UserEntity, BoardEntity, BoardLikeEntity, TagEntity],
+            entities: [UserEntity, BoardEntity, BoardLikeEntity, TagEntity, TagMappingEntity],
             synchronize: true, // 재시작 시 테이블 구조 항상 동기화
             logging: false // DB작업 콘솔에 로그 출력
         })

@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { TagMappingEntity } from './tag.mapping.entity';
 
 @Entity('tag')
 export class TagEntity {
@@ -10,4 +11,7 @@ export class TagEntity {
 
     @CreateDateColumn()
     created_at: Date;
+
+    @OneToMany(() => TagMappingEntity, (tagMapping) => tagMapping.tag)
+    tagMappings: TagMappingEntity[];
 }
