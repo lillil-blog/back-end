@@ -1,8 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateTagDTO } from 'src/domain/tag/dto/create.tag.dto';
-import { TagEntity } from 'src/domain/tag/repository/tag.entity';
-import { TagService } from 'src/domain/tag/service/tag.service';
+import { CreateTagDTO } from 'src/domain/tags/dto/create.tag.dto';
+import { TagEntity } from 'src/domain/tags/repository/tag.entity';
+import { TagService } from 'src/domain/tags/service/tag.service';
 import { TagModule } from 'src/modules/domain/tag.module';
 import { TypeOrmModule } from 'src/modules/typeorm.module';
 

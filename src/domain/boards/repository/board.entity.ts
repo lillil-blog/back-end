@@ -1,13 +1,10 @@
-import { TagEntity } from 'src/domain/tag/repository/tag.entity';
-import { TagMappingEntity } from 'src/domain/tag/repository/tag.mapping.entity';
-import { UserEntity } from 'src/domain/user/repository/user.entity';
+import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
+import { UserEntity } from 'src/domain/users/repository/user.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
     JoinColumn,
-    JoinTable,
-    ManyToMany,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,

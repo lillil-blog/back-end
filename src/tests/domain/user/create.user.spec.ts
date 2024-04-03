@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateUserDTO } from 'src/domain/user/dto/create.user.dto';
-import { UserService } from 'src/domain/user/service/user.service';
+import { CreateUserDTO } from 'src/domain/users/dto/create.user.dto';
+import { UserService } from 'src/domain/users/service/user.service';
 import { UserModule } from 'src/modules/domain/user.module';
 import { TypeOrmModule } from 'src/modules/typeorm.module';
 

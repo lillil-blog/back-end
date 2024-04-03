@@ -1,4 +1,4 @@
-import { BoardEntity } from 'src/domain/board/repository/board.entity';
+import { BoardEntity } from 'src/domain/boards/repository/board.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TagEntity } from './tag.entity';
 

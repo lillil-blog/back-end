@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BoardEntity } from 'src/domain/board/repository/board.entity';
-import { BoardService } from 'src/domain/board/service/board.service';
+import { BoardEntity } from 'src/domain/boards/repository/board.entity';
+import { BoardService } from 'src/domain/boards/service/board.service';
 import { BoardModule } from 'src/modules/domain/board.module';
 import { TypeOrmModule } from 'src/modules/typeorm.module';
 

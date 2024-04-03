@@ -1,8 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateBoardDTO } from 'src/domain/board/dto/create.board.dto';
-import { UpdateBoardDTO } from 'src/domain/board/dto/update.board.dto';
-import { BoardService } from 'src/domain/board/service/board.service';
+import { CreateBoardDTO } from 'src/domain/boards/dto/create.board.dto';
+import { UpdateBoardDTO } from 'src/domain/boards/dto/update.board.dto';
+import { BoardService } from 'src/domain/boards/service/board.service';
 import { BoardModule } from 'src/modules/domain/board.module';
 import { TypeOrmModule } from 'src/modules/typeorm.module';
 

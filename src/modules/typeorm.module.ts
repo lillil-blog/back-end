@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule as NestTypeOrmModule } from '@nestjs/typeorm';
-import { BoardEntity } from 'src/domain/board/repository/board.entity';
-import { BoardLikeEntity } from 'src/domain/board/repository/board.like.entity';
-import { TagEntity } from 'src/domain/tag/repository/tag.entity';
-import { TagMappingEntity } from 'src/domain/tag/repository/tag.mapping.entity';
-import { UserEntity } from 'src/domain/user/repository/user.entity';
+import { BoardEntity } from 'src/domain/boards/repository/board.entity';
+import { BoardLikeEntity } from 'src/domain/boards/repository/board.like.entity';
+import { TagEntity } from 'src/domain/tags/repository/tag.entity';
+import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
+import { UserEntity } from 'src/domain/users/repository/user.entity';
 
 @Module({
     imports: [
