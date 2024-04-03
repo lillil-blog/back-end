@@ -46,12 +46,4 @@ export class BoardEntity {
 
     @OneToMany(() => TagMappingEntity, (tagMapping) => tagMapping.board)
     tagMappings: TagMappingEntity[];
-
-    // @ManyToMany(() => TagEntity)
-    // @JoinTable({
-    //     name: 'tag_mapping',
-    //     joinColumn: { name: 'board_no', referencedColumnName: 'board_no' },
-    //     inverseJoinColumn: { name: 'tag_no', referencedColumnName: 'tag_no' }
-    // })
-    // tags: TagEntity[];
 }
