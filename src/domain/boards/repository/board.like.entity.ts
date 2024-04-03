@@ -4,7 +4,7 @@ import { BoardEntity } from './board.entity';
 @Entity('board_like')
 export class BoardLikeEntity {
     @PrimaryGeneratedColumn()
-    board_like_no: number;
+    like_no: number;
 
     @Column()
     ip: string;
