@@ -14,5 +14,5 @@ export class BoardLikeEntity {
 
     @ManyToOne(() => BoardEntity, { nullable: false })
     @JoinColumn({ name: 'board_no', referencedColumnName: 'board_no' })
-    board_no: BoardEntity;
+    board: BoardEntity;
 }

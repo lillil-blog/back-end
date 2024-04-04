@@ -3,6 +3,7 @@ import { CreateBoardDTO } from '../dto/create.board.dto';
 import { BoardRepository } from '../repository/board.repository';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
 import { BoardEntity } from '../repository/board.entity';
+import { ReadBoardDTO } from '../dto/read.board.dto';
 
 @Injectable()
 export class BoardService {
@@ -18,14 +19,14 @@ export class BoardService {
     /**
      * 글 번호로 해당 글의 상세정보를 불러오도록 한다.
      */
-    async readBoard(board_no: number): Promise<BoardEntity> {
-        const boardEntity = await this.boardRepository.read(board_no);
+    async readBoard(board_no: number): Promise<ReadBoardDTO> {
+        const readBoardDTO = await this.boardRepository.read(board_no);
 
-        if (!boardEntity) {
+        if (!readBoardDTO) {
             throw new NotFoundException('Post not found!');
         }
 
-        return boardEntity;
+        return readBoardDTO;
     }
 
     /**

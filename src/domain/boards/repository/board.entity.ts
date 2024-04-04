@@ -10,6 +10,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
+import { BoardLikeEntity } from './board.like.entity';
 
 @Entity('board')
 export class BoardEntity {
@@ -37,10 +38,16 @@ export class BoardEntity {
     @UpdateDateColumn()
     updated_at: Date;
 
+    //Transient Field, 좋아요 개수 저장용
+    likecnt: number;
+
     @ManyToOne(() => UserEntity, { nullable: false })
     @JoinColumn({ name: 'writer', referencedColumnName: 'id' })
     writer: UserEntity;
 
     @OneToMany(() => TagMappingEntity, (tagMapping) => tagMapping.board)
     tagMappings: TagMappingEntity[];
+
+    @OneToMany(() => BoardLikeEntity, (boardLike) => boardLike.board)
+    boardLikes: BoardLikeEntity[];
 }

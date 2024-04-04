@@ -4,6 +4,8 @@ import { BoardEntity } from './board.entity';
 import { Repository } from 'typeorm';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
+import { ReadBoardDTO } from '../dto/read.board.dto';
+import { ReadTagDTO } from 'src/domain/tags/dto/read.tag.dto';
 
 @Injectable()
 export class BoardRepository {
@@ -54,23 +56,27 @@ export class BoardRepository {
     }
 
     /**
-     * board테이블의 PK를 받아와 해당 글번호의 포스트의 엔티티를 리턴해주도록 한다.
+     * board테이블의 PK를 받아와 해당 글번호의 포스트 정보와 연관된 데이터를 리턴해주도록 한다.
      */
-    async read(board_no: number): Promise<BoardEntity> {
-        const boardEntity = await this.boardRepository.findOne({
-            where: { board_no: board_no },
-            relations: ['tagMappings', 'tagMappings.tag']
-        });
+    async read(board_no: number): Promise<ReadBoardDTO> {
+        const boardEntity = await this.boardRepository
+            .createQueryBuilder('board')
+            .innerJoinAndSelect('board.tagMappings', 'tagMappings')
+            .leftJoinAndSelect('tagMappings.tag', 'tag')
+            .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
+            .where('board.board_no = :board_no', { board_no })
+            .getOne();
 
-        // 태그맵핑 안의 객체의 배열을 풀어서 보기좋게 만들도록 출력 형식 조정
-        if (boardEntity && boardEntity.tagMappings) {
-            boardEntity.tagMappings = boardEntity.tagMappings.map((item) => ({
-                tag: item.tag,
-                ...item
-            }));
-        }
+        const readTagDTOArray: ReadTagDTO[] = boardEntity.tagMappings.map((item) => item.tag);
+        const readBoardDTO: ReadBoardDTO = {
+            tags: readTagDTOArray,
+            ...(() => {
+                delete boardEntity.tagMappings;
+                return boardEntity;
+            })()
+        };
 
-        return boardEntity;
+        return readBoardDTO;
     }
 
     /**

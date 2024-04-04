@@ -12,6 +12,7 @@ import {
     ApiTags,
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
+import { ReadBoardDTO } from '../dto/read.board.dto';
 
 @Controller('/boards')
 @ApiTags('Board API')
@@ -52,7 +53,7 @@ export class BoardController {
         example: 12
     })
     @ApiResponse({ status: 200, description: '성공적으로 해당 글의 상세정보를 불러왔습니다.' })
-    async detailBoard(@Param('board_no') board_no: number): Promise<BoardEntity> {
+    async detailBoard(@Param('board_no') board_no: number): Promise<ReadBoardDTO> {
         return this.boardService.readBoard(board_no);
     }
 
