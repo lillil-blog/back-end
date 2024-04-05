@@ -33,7 +33,7 @@ export class BoardService {
      * 글 목록을 불러오도록 한다.
      * @TODO 페이징, 검색 생각해볼것
      */
-    async listAllBoard(): Promise<BoardEntity[]> {
+    async listAllBoard(): Promise<ReadBoardDTO[]> {
         return this.boardRepository.listAll();
     }
 

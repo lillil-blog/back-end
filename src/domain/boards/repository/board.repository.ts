@@ -33,26 +33,30 @@ export class BoardRepository {
      * 게시글 목록 전체를 불러오도록 한다.
      * @TODO 페이징, 검색기능 생각해서 추가할 것
      */
-    async listAll(): Promise<BoardEntity[]> {
-        const list = await this.boardRepository.find({
-            relations: ['tagMappings', 'tagMappings.tag']
+    async listAll(): Promise<ReadBoardDTO[]> {
+        const boardEntities = await this.boardRepository
+            .createQueryBuilder('board')
+            .leftJoinAndSelect('board.tagMappings', 'tagMappings')
+            .leftJoinAndSelect('tagMappings.tag', 'tag')
+            .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
+            .getMany();
+
+        const listBoardDTO = boardEntities.map((boardItem) => {
+            const readTagDTOArray: ReadTagDTO[] = boardItem.tagMappings.map((tagItem) => tagItem.tag);
+            const readBoardDTO: ReadBoardDTO = {
+                tags: readTagDTOArray,
+                ...(() => {
+                    delete boardItem.tagMappings;
+                    return boardItem;
+                })()
+            };
+
+            return readBoardDTO;
         });
 
-        const resultList: Array<BoardEntity> = list.map((boardItem) => {
-            if (boardItem.tagMappings) {
-                const tagMappings = boardItem.tagMappings.map((tagItem) => ({
-                    ...tagItem,
-                    tag: tagItem.tag
-                }));
-                return {
-                    ...boardItem,
-                    tagMappings
-                };
-            }
-            return boardItem;
-        });
+        console.log(listBoardDTO);
 
-        return resultList;
+        return listBoardDTO;
     }
 
     /**
@@ -62,7 +66,7 @@ export class BoardRepository {
         const boardEntity = await this.boardRepository
             .createQueryBuilder('board')
             .innerJoinAndSelect('board.tagMappings', 'tagMappings')
-            .leftJoinAndSelect('tagMappings.tag', 'tag')
+            .innerJoinAndSelect('tagMappings.tag', 'tag')
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
             .where('board.board_no = :board_no', { board_no })
             .getOne();

@@ -38,7 +38,7 @@ export class BoardController {
         description: '모든 글 목록을 불러옵니다.'
     })
     @ApiResponse({ status: 200, description: '성공적으로 글 목록을 불러왔습니다.' })
-    async listBoards(): Promise<Array<BoardEntity>> {
+    async listBoards(): Promise<ReadBoardDTO[]> {
         return this.boardService.listAllBoard();
     }
 
