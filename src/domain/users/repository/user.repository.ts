@@ -31,4 +31,13 @@ export class UserRepository {
             where: { id: id }
         });
     }
+
+    /**
+     * user_no 값을 매개변수로 받아 일치하는 유저정보를 찾아 리턴시키도록 한다.
+     */
+    async readByUserNo(user_no: number): Promise<UserEntity> {
+        return this.userRepository.findOne({
+            where: { user_no: user_no }
+        });
+    }
 }
