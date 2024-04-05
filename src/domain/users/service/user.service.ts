@@ -1,22 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { CreateUserDTO } from '../dto/create.user.dto';
 import { UserEntity } from '../repository/user.entity';
 import { UpdateUserDTO } from '../dto/update.user.dto';
+import { LoginUserDTO } from '../dto/login.user.dto';
+import { CommonUtil } from 'src/utils/common.util';
+import { AuthService } from 'src/middleware/auth/service/auth.service';
 
 @Injectable()
 export class UserService {
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly authService: AuthService
+    ) {}
 
-    async loginUser() {}
+    async loginUser(loginUserDTO: LoginUserDTO) {
+        const user = await this.userRepository.readById(loginUserDTO.id);
+        const passwordCompare = await CommonUtil.compareHash(loginUserDTO.password, user.password);
 
-    /**
-     * 새 유저 생성과 기존 유저정보 업데이트를 수행하도록 한다.
-     * 받아오는 DTO 형식에 따라 처리되며 업데이트 시 포함되지 않은 필드값은
-     * 생략되어 업데이트가 수행된다.
-     */
-    async saveUser(userDTO: CreateUserDTO | UpdateUserDTO): Promise<UserEntity> {
-        return this.userRepository.save(userDTO);
+        if (!user || !passwordCompare) {
+            throw new NotFoundException('User not found!');
+        }
+
+        const tokens = {
+            accessToken: await this.authService.generateAccessToken({ id: user.id }),
+            refreshToken: await this.authService.generateRefreshToken({ user_no: user.user_no })
+        };
+
+        return tokens;
+    }
+
+    async createUser(createUserDTO: CreateUserDTO): Promise<UserEntity> {
+        const userEntity = await this.userRepository.readById(createUserDTO.id);
+
+        if (userEntity) {
+            throw new UnauthorizedException(`${createUserDTO.id} is already exist!`);
+        }
+
+        createUserDTO.password = await CommonUtil.generateHash(createUserDTO.password);
+
+        return this.userRepository.save(createUserDTO);
+    }
+
+    async updateUser(updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
+        updateUserDTO.password = updateUserDTO.password
+            ? await CommonUtil.generateHash(updateUserDTO.password)
+            : undefined;
+
+        return this.userRepository.save(updateUserDTO);
     }
 
     /**

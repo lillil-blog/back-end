@@ -23,6 +23,8 @@ export class UserRepository {
         return this.userRepository.save(UserEntity);
     }
 
+    async update(updateUserDTO: UpdateUserDTO) {}
+
     /**
      * id값을 매개변수로 받아 일치하는 유저정보를 찾아 리턴시키도록 한다.
      */

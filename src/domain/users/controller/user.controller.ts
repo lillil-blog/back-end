@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Res } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateUserDTO } from '../dto/create.user.dto';
 import { UserEntity } from '../repository/user.entity';
@@ -11,6 +11,8 @@ import {
     ApiTags,
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
+import { LoginUserDTO } from '../dto/login.user.dto';
+import { Response } from 'express';
 
 @Controller('/users')
 @ApiTags('User API')
@@ -21,14 +23,17 @@ export class UserController {
 
     @Post('/login')
     @ApiOperation({
-        summary: '로그인(미구현)',
+        summary: '로그인',
         description: '수신한 JSON 데이터를 바탕으로 로그인 처리 후 올바른 값이면 토큰을 발급합니다.'
     })
-    async userLogin() {
-        /**
-         * @TODO
-         * JWT 토큰 구현해서 작성해야함
-         */
+    @ApiBody({ type: LoginUserDTO })
+    async userLogin(@Body() loginUserDTO: LoginUserDTO, @Res({ passthrough: true }) res: Response) {
+        const tokens = await this.userService.loginUser(loginUserDTO);
+
+        res.cookie('accessToken', tokens.accessToken, { httpOnly: true, sameSite: 'none' });
+        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, sameSite: 'none' });
+
+        return { message: 'login successful' };
     }
 
     @Post('/register')
@@ -39,7 +44,7 @@ export class UserController {
     @ApiBody({ type: CreateUserDTO })
     @ApiResponse({ status: 201, description: '성공적으로 새 유저를 생성하였습니다.' })
     async userRegister(@Body() createUserDTO: CreateUserDTO): Promise<UserEntity> {
-        return await this.userService.saveUser(createUserDTO);
+        return await this.userService.createUser(createUserDTO);
     }
 
     @Get('/me')
@@ -61,6 +66,6 @@ export class UserController {
     @ApiBody({ type: UpdateUserDTO })
     @ApiResponse({ status: 201, description: '성공적으로 해당 유저의 정보를 변경했습니다.' })
     async userModify(@Body() updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
-        return this.userService.saveUser(updateUserDTO);
+        return this.userService.updateUser(updateUserDTO);
     }
 }
