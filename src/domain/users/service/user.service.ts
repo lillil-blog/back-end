@@ -6,8 +6,6 @@ import { UpdateUserDTO } from '../dto/update.user.dto';
 import { LoginUserDTO } from '../dto/login.user.dto';
 import { CommonUtil } from 'src/utils/common.util';
 import { AuthService } from 'src/middleware/auth/service/auth.service';
-import { Request } from 'express';
-import { AccessTokenDTO } from 'src/middleware/auth/dto/auth.access.token.dto';
 import { isJWT } from 'class-validator';
 import { CheckerUtil } from 'src/utils/checker.util';
 

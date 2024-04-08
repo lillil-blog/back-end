@@ -22,3 +22,7 @@ import * as path from 'path';
     ]
 })
 export class TypeOrmModule {}
+
+/**
+ * @TODO DB연결정보 환경변수로 변경
+ */

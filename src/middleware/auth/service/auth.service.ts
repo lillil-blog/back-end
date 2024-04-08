@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AccessTokenDTO } from '../dto/auth.access.token.dto';
+import { AccessTokenDTO } from '../dto/auth.access.payload.dto';
 import { RefreshTokenDTO } from '../dto/auth.refresh.token.dto';
 
 @Injectable()
