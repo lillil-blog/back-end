@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { AccessTokenDTO } from '../dto/auth.access.token.dto';
+import { RefreshTokenDTO } from '../dto/auth.refresh.token.dto';
 
 @Injectable()
 export class AuthService {
@@ -9,9 +11,10 @@ export class AuthService {
         private readonly configService: ConfigService
     ) {}
 
-    async generateAccessToken(payload: { id: string }): Promise<string> {
+    async generateAccessToken(payload: AccessTokenDTO): Promise<string> {
         return this.jwtService.signAsync(
             {
+                user_no: payload.user_no,
                 id: payload.id
             },
             {
@@ -21,10 +24,12 @@ export class AuthService {
         );
     }
 
-    async generateRefreshToken(payload: { user_no: number }): Promise<string> {
+    async generateRefreshToken(payload: RefreshTokenDTO): Promise<string> {
         return this.jwtService.signAsync(
             {
-                user_no: payload.user_no
+                user_no: payload.user_no,
+                id: payload.id,
+                accessToken: payload.accessToken
             },
             {
                 secret: this.configService.get('AUTH_REFRESH_KEY'),
@@ -33,7 +38,13 @@ export class AuthService {
         );
     }
 
-    async verifyRefreshToken(refreshToken: string): Promise<{ user_no: number }> {
+    async verifyAccessToken(accessToken: string): Promise<AccessTokenDTO> {
+        return this.jwtService.verifyAsync(accessToken, {
+            secret: this.configService.get('AUTH_ACCESS_KEY')
+        });
+    }
+
+    async verifyRefreshToken(refreshToken: string): Promise<RefreshTokenDTO> {
         return this.jwtService.verifyAsync(refreshToken, {
             secret: this.configService.get('AUTH_REFRESH_KEY')
         });
