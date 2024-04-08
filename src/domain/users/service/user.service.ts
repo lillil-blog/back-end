@@ -6,6 +6,10 @@ import { UpdateUserDTO } from '../dto/update.user.dto';
 import { LoginUserDTO } from '../dto/login.user.dto';
 import { CommonUtil } from 'src/utils/common.util';
 import { AuthService } from 'src/middleware/auth/service/auth.service';
+import { Request } from 'express';
+import { AccessTokenDTO } from 'src/middleware/auth/dto/auth.access.token.dto';
+import { isJWT } from 'class-validator';
+import { CheckerUtil } from 'src/utils/checker.util';
 
 @Injectable()
 export class UserService {
@@ -22,12 +26,17 @@ export class UserService {
             throw new NotFoundException('User not found!');
         }
 
-        const tokens = {
-            accessToken: await this.authService.generateAccessToken({ id: user.id }),
-            refreshToken: await this.authService.generateRefreshToken({ user_no: user.user_no })
-        };
+        const accessToken = await this.authService.generateAccessToken({ user_no: user.user_no, id: user.id });
+        const refreshToken = await this.authService.generateRefreshToken({
+            user_no: user.user_no,
+            id: user.id,
+            accessToken: accessToken
+        });
 
-        return tokens;
+        return {
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        };
     }
 
     async createUser(createUserDTO: CreateUserDTO): Promise<UserEntity> {
@@ -42,18 +51,27 @@ export class UserService {
         return this.userRepository.save(createUserDTO);
     }
 
-    async updateUser(updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
+    /**
+     * id값을 매개변수로 받아 일치하는 유저의 정보를 리턴시키도록 한다.
+     */
+    async detailUser(accessToken: string): Promise<UserEntity> {
+        CheckerUtil.assertCheck(isJWT(accessToken), '올바른 토큰의 형식이 아닙니다.');
+
+        const accessTokenPayload = await this.authService.verifyAccessToken(accessToken);
+
+        return this.userRepository.readByUserNo(accessTokenPayload.user_no);
+    }
+
+    async updateUser(updateUserDTO: UpdateUserDTO, accessToken: string): Promise<UserEntity> {
+        CheckerUtil.assertCheck(isJWT(accessToken), '올바른 토큰의 형식이 아닙니다.');
+
+        const accessTokenPayload = await this.authService.verifyAccessToken(accessToken);
+
+        updateUserDTO.user_no = accessTokenPayload.user_no;
         updateUserDTO.password = updateUserDTO.password
             ? await CommonUtil.generateHash(updateUserDTO.password)
             : undefined;
 
         return this.userRepository.save(updateUserDTO);
-    }
-
-    /**
-     * id값을 매개변수로 받아 일치하는 유저의 정보를 리턴시키도록 한다.
-     */
-    async detailUser(id: string): Promise<UserEntity> {
-        return this.userRepository.readById(id);
     }
 }

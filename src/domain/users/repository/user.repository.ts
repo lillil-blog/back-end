@@ -18,12 +18,10 @@ export class UserRepository {
      * 생략되어 업데이트가 수행된다.
      */
     async save(userDTO: CreateUserDTO | UpdateUserDTO): Promise<UserEntity> {
-        const UserEntity = this.userRepository.create(userDTO);
+        const userEntity = this.userRepository.create(userDTO);
 
-        return this.userRepository.save(UserEntity);
+        return this.userRepository.save(userEntity);
     }
-
-    async update(updateUserDTO: UpdateUserDTO) {}
 
     /**
      * id값을 매개변수로 받아 일치하는 유저정보를 찾아 리턴시키도록 한다.

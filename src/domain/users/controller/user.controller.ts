@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateUserDTO } from '../dto/create.user.dto';
 import { UserEntity } from '../repository/user.entity';
@@ -12,7 +12,7 @@ import {
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { LoginUserDTO } from '../dto/login.user.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('/users')
 @ApiTags('User API')
@@ -50,12 +50,11 @@ export class UserController {
     @Get('/me')
     @ApiOperation({
         summary: '내정보 상세',
-        description: 'id값을 수신하여 해당 유저의 상세정보를 리턴합니다.'
+        description: '현재 로그인 한 유저의 상세정보를 리턴합니다.'
     })
-    @ApiBody({ schema: { properties: { id: { type: 'string', example: 'test01' } } } })
     @ApiResponse({ status: 200, description: '성공적으로 해당 유저의 정보를 불러왔습니다.' })
-    async userDetail(@Body('id') id: string): Promise<UserEntity> {
-        return this.userService.detailUser(id);
+    async userDetail(@Req() req: Request): Promise<UserEntity> {
+        return this.userService.detailUser(req.cookies.accessToken);
     }
 
     @Patch('/me')
@@ -65,7 +64,7 @@ export class UserController {
     })
     @ApiBody({ type: UpdateUserDTO })
     @ApiResponse({ status: 201, description: '성공적으로 해당 유저의 정보를 변경했습니다.' })
-    async userModify(@Body() updateUserDTO: UpdateUserDTO): Promise<UserEntity> {
-        return this.userService.updateUser(updateUserDTO);
+    async userModify(@Body() updateUserDTO: UpdateUserDTO, @Req() req: Request): Promise<UserEntity> {
+        return this.userService.updateUser(updateUserDTO, req.cookies.accessToken);
     }
 }
