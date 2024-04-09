@@ -5,9 +5,10 @@ import { UserModule } from './modules/domain/user.module';
 import { BoardModule } from './modules/domain/board.module';
 import { TagModule } from './modules/domain/tag.module';
 import { ServeStaticModule } from './modules/serve.static.module';
+import { RedisModule } from './modules/middleware/redis.module';
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule, ServeStaticModule, UserModule, BoardModule, TagModule],
+    imports: [ConfigModule, TypeOrmModule, ServeStaticModule, RedisModule, UserModule, BoardModule, TagModule],
     controllers: [],
     providers: []
 })
