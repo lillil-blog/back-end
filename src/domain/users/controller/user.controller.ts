@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateUserDTO } from '../dto/create.user.dto';
 import { UserEntity } from '../repository/user.entity';
@@ -13,6 +13,8 @@ import {
 } from '@nestjs/swagger';
 import { LoginUserDTO } from '../dto/login.user.dto';
 import { Request, Response } from 'express';
+import { JWTAccessGuard } from 'src/middleware/auth/guard/jwt.access.guard';
+import { JWTRefreshGuard } from 'src/middleware/auth/guard/jwt.refresh.guard';
 
 @Controller('/users')
 @ApiTags('User API')
@@ -27,6 +29,7 @@ export class UserController {
         description: '수신한 JSON 데이터를 바탕으로 로그인 처리 후 올바른 값이면 토큰을 발급합니다.'
     })
     @ApiBody({ type: LoginUserDTO })
+    @ApiResponse({ status: 201, description: '성공적으로 로그인이 되어 Httponly 쿠키에 토큰이 등록되었습니다.' })
     async userLogin(@Body() loginUserDTO: LoginUserDTO, @Res({ passthrough: true }) res: Response) {
         const tokens = await this.userService.loginUser(loginUserDTO);
 
@@ -53,6 +56,7 @@ export class UserController {
         description: '현재 로그인 한 유저의 상세정보를 리턴합니다.'
     })
     @ApiResponse({ status: 200, description: '성공적으로 해당 유저의 정보를 불러왔습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async userDetail(@Req() req: Request): Promise<UserEntity> {
         return this.userService.detailUser(req.cookies.accessToken);
     }
@@ -64,7 +68,28 @@ export class UserController {
     })
     @ApiBody({ type: UpdateUserDTO })
     @ApiResponse({ status: 201, description: '성공적으로 해당 유저의 정보를 변경했습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async userModify(@Body() updateUserDTO: UpdateUserDTO, @Req() req: Request): Promise<UserEntity> {
         return this.userService.updateUser(updateUserDTO, req.cookies.accessToken);
+    }
+
+    @Post('/reissueToken')
+    @ApiOperation({
+        summary: '토큰 재발급',
+        description:
+            '유효한 RefreshToken이 httponly 쿠키에 담겨있을 때 해당 URL로 POST 요청 시 서버에서 검증 후 각 토큰을 재발급합니다.'
+    })
+    @ApiResponse({ status: 201, description: '성공적으로 토큰을 재발급했습니다.' })
+    // @UseGuards(JWTRefreshGuard)
+    async reissueToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        const tokens = await this.userService.reissueToken({
+            accessToken: req.cookies.accessToken,
+            refreshToken: req.cookies.refreshToken
+        });
+
+        res.cookie('accessToken', tokens['accessToken'], { httpOnly: true, sameSite: 'none' });
+        res.cookie('refreshToken', tokens['refreshToken'], { httpOnly: true, sameSite: 'none' });
+
+        return { message: 'Token reissue has been completed successfully.' };
     }
 }

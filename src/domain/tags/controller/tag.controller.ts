@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { TagService } from '../service/tag.service';
 import { CreateTagDTO } from '../dto/create.tag.dto';
 import { TagEntity } from '../repository/tag.entity';
@@ -11,6 +11,7 @@ import {
     ApiTags,
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
+import { JWTAccessGuard } from 'src/middleware/auth/guard/jwt.access.guard';
 
 @Controller('/tags')
 @ApiTags('Tag API')
@@ -26,6 +27,7 @@ export class TagController {
     })
     @ApiBody({ type: CreateTagDTO })
     @ApiResponse({ status: 201, description: '성공적으로 새 태그를 생성하였습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async createTag(@Body() createTagDTO: CreateTagDTO): Promise<TagEntity> {
         return this.tagService.createTag(createTagDTO);
     }
@@ -51,6 +53,7 @@ export class TagController {
         example: 3
     })
     @ApiResponse({ status: 201, description: '성공적으로 해당 태그를 삭제하였습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async deleteTag(@Param('tag_no') tag_no: number): Promise<object> {
         return this.tagService.deleteTag(tag_no);
     }

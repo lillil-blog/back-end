@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { BoardEntity } from '../repository/board.entity';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { BoardService } from '../service/board.service';
@@ -13,6 +13,7 @@ import {
     ApiUnauthorizedResponse
 } from '@nestjs/swagger';
 import { ReadBoardDTO } from '../dto/read.board.dto';
+import { JWTAccessGuard } from 'src/middleware/auth/guard/jwt.access.guard';
 
 @Controller('/boards')
 @ApiTags('Board API')
@@ -28,6 +29,7 @@ export class BoardController {
     })
     @ApiBody({ type: CreateBoardDTO })
     @ApiResponse({ status: 201, description: '성공적으로 새 블로그 포스트를 등록했습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async createBoard(@Body() createBoardDTO: CreateBoardDTO): Promise<BoardEntity> {
         return this.boardService.saveBoard(createBoardDTO);
     }
@@ -65,6 +67,7 @@ export class BoardController {
     })
     @ApiBody({ type: UpdateBoardDTO })
     @ApiResponse({ status: 201, description: '성공적으로 해당 글의 정보를 변경했습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async modifyBoard(@Body() updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity> {
         return this.boardService.saveBoard(updateBoardDTO);
     }
@@ -80,6 +83,7 @@ export class BoardController {
         example: 12
     })
     @ApiResponse({ status: 201, description: '성공적으로 해당 글을 삭제하였습니다.' })
+    // @UseGuards(JWTAccessGuard)
     async deleteBoard(@Param('board_no') board_no: number): Promise<object> {
         return this.boardService.deleteBoard(board_no);
     }
