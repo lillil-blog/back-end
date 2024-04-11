@@ -6,12 +6,16 @@ import { CreateBoardDTO } from '../dto/create.board.dto';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
 import { ReadBoardDTO } from '../dto/read.board.dto';
 import { ReadTagDTO } from 'src/domain/tags/dto/read.tag.dto';
+import { TagEntity } from 'src/domain/tags/repository/tag.entity';
+import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
 
 @Injectable()
 export class BoardRepository {
     constructor(
         @InjectRepository(BoardEntity)
-        private readonly boardRepository: Repository<BoardEntity>
+        private readonly boardRepository: Repository<BoardEntity>,
+        @InjectRepository(TagMappingEntity)
+        private readonly tagMappingRepository: Repository<TagMappingEntity>
     ) {}
 
     /**
@@ -19,14 +23,25 @@ export class BoardRepository {
      * 받아오는 DTO 형식에 따라 처리되며 업데이트 시 포함되지 않은 필드값은
      * 생략되어 업데이트가 수행된다.
      */
-    async save(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity> {
+    async save(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
         const { writer, ...rest } = boardDTO;
         const boardEntity = this.boardRepository.create({
             ...rest,
             ...(writer && { writer: { id: writer } })
         });
 
-        return this.boardRepository.save(boardEntity);
+        const boardResult = await this.boardRepository.save(boardEntity);
+
+        if (boardDTO.tags) {
+            const tagTasks = boardDTO.tags.map((item) =>
+                this.tagMappingRepository.save({ board: { board_no: boardResult.board_no }, tag: { tag_no: item } })
+            );
+
+            const tagMappingResult = await Promise.all(tagTasks);
+
+            return Object.assign({ board: boardResult }, { tagMapping: tagMappingResult });
+        }
+        return boardResult;
     }
 
     /**
@@ -39,6 +54,38 @@ export class BoardRepository {
             .leftJoinAndSelect('board.tagMappings', 'tagMappings')
             .leftJoinAndSelect('tagMappings.tag', 'tag')
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
+            .orderBy('board.board_no', 'DESC')
+            .getMany();
+
+        const listBoardDTO = boardEntities.map((boardItem) => {
+            const readTagDTOArray: ReadTagDTO[] = boardItem.tagMappings.map((tagItem) => tagItem.tag);
+            const readBoardDTO: ReadBoardDTO = {
+                tags: readTagDTOArray,
+                ...(() => {
+                    delete boardItem.tagMappings;
+                    return boardItem;
+                })()
+            };
+
+            return readBoardDTO;
+        });
+
+        console.log(listBoardDTO);
+
+        return listBoardDTO;
+    }
+
+    /**
+     * 매개변수로 받은 숫자만큼의 최근 글을 리턴시키도록 한다.
+     */
+    async listRecent(count: number): Promise<ReadBoardDTO[]> {
+        const boardEntities = await this.boardRepository
+            .createQueryBuilder('board')
+            .leftJoinAndSelect('board.tagMappings', 'tagMappings')
+            .leftJoinAndSelect('tagMappings.tag', 'tag')
+            .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
+            .orderBy('board.board_no', 'DESC')
+            .take(count)
             .getMany();
 
         const listBoardDTO = boardEntities.map((boardItem) => {

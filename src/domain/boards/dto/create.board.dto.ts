@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateBoardDTO {
     @ApiProperty({ description: '글 제목', example: '테스트 글 제목입니다.' })
@@ -18,8 +18,13 @@ export class CreateBoardDTO {
     @IsString()
     category: string;
 
-    @ApiProperty({ description: '썸네일 파일명', example: '/default_thumbnail.png' })
+    @ApiPropertyOptional({ description: '썸네일 파일명', example: '/default_thumbnail.png' })
     @IsOptional()
     @IsString()
     thumbnail: string;
+
+    @ApiPropertyOptional({ description: '등록할 태그들의 PK 번호', example: [2, 3] })
+    @IsOptional()
+    @IsNumber()
+    tags: number[];
 }

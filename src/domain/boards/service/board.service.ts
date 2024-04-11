@@ -12,7 +12,7 @@ export class BoardService {
     /**
      * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
      */
-    async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity> {
+    async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
         return this.boardRepository.save(boardDTO);
     }
 

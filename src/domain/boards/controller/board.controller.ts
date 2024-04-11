@@ -30,7 +30,7 @@ export class BoardController {
     @ApiBody({ type: CreateBoardDTO })
     @ApiResponse({ status: 201, description: '성공적으로 새 블로그 포스트를 등록했습니다.' })
     // @UseGuards(JWTAccessGuard)
-    async createBoard(@Body() createBoardDTO: CreateBoardDTO): Promise<BoardEntity> {
+    async createBoard(@Body() createBoardDTO: CreateBoardDTO): Promise<BoardEntity | object> {
         return this.boardService.saveBoard(createBoardDTO);
     }
 
@@ -59,16 +59,15 @@ export class BoardController {
         return this.boardService.readBoard(board_no);
     }
 
-    @Patch('/:board_no')
+    @Patch('/')
     @ApiOperation({
-        summary: '글 수정(형식 변경예정/미구현)',
-        description:
-            'board_no를 동적라우팅 파라미터로 수신하고, 수정할 데이터를 UpdateBoardDTO 형식의 Body JSON으로 수신하여 해당 글의 정보를 변경합니다.'
+        summary: '글 수정',
+        description: '수정할 데이터를 UpdateBoardDTO 형식의 Body JSON으로 수신하여 해당 글의 정보를 변경합니다.'
     })
     @ApiBody({ type: UpdateBoardDTO })
     @ApiResponse({ status: 201, description: '성공적으로 해당 글의 정보를 변경했습니다.' })
     // @UseGuards(JWTAccessGuard)
-    async modifyBoard(@Body() updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity> {
+    async modifyBoard(@Body() updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity | object> {
         return this.boardService.saveBoard(updateBoardDTO);
     }
 
@@ -87,4 +86,9 @@ export class BoardController {
     async deleteBoard(@Param('board_no') board_no: number): Promise<object> {
         return this.boardService.deleteBoard(board_no);
     }
+
+    /**
+     * @TODO
+     * board_like 추가할것
+     */
 }
