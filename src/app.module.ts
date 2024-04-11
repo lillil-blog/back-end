@@ -6,9 +6,19 @@ import { BoardModule } from './modules/domain/board.module';
 import { TagModule } from './modules/domain/tag.module';
 import { ServeStaticModule } from './modules/serve.static.module';
 import { RedisModule } from './modules/middleware/redis.module';
+import { RootModule } from './modules/domain/root.module';
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule, ServeStaticModule, RedisModule, UserModule, BoardModule, TagModule],
+    imports: [
+        ConfigModule,
+        TypeOrmModule,
+        ServeStaticModule,
+        RedisModule,
+        RootModule,
+        UserModule,
+        BoardModule,
+        TagModule
+    ],
     controllers: [],
     providers: []
 })
