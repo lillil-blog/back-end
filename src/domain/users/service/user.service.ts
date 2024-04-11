@@ -6,7 +6,7 @@ import { UpdateUserDTO } from '../dto/update.user.dto';
 import { LoginUserDTO } from '../dto/login.user.dto';
 import { CommonUtil } from 'src/utils/common.util';
 import { AuthService } from 'src/middleware/auth/service/auth.service';
-import { isJWT, isNotEmpty } from 'class-validator';
+import { isJWT } from 'class-validator';
 import { CheckerUtil } from 'src/utils/checker.util';
 import { RedisTokenService } from 'src/middleware/redis/service/redis.token.service';
 import { ConfigService } from '@nestjs/config';
@@ -25,11 +25,10 @@ export class UserService {
      */
     async loginUser(loginUserDTO: LoginUserDTO) {
         const user = await this.userRepository.readById(loginUserDTO.id);
-        const passwordCompare = await CommonUtil.compareHash(loginUserDTO.password, user.password);
+        CheckerUtil.assertCheck(user !== null, 'User not found!');
 
-        if (!user || !passwordCompare) {
-            throw new NotFoundException('User not found!');
-        }
+        const passwordCompare = await CommonUtil.compareHash(loginUserDTO.password, user.password);
+        CheckerUtil.assertCheck(passwordCompare, 'User not found!');
 
         const accessToken = await this.authService.generateAccessToken({ user_no: user.user_no, id: user.id });
         const refreshToken = await this.authService.generateRefreshToken({

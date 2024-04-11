@@ -40,4 +40,15 @@ export class UserRepository {
             where: { user_no: user_no }
         });
     }
+
+    async listAllUsers(): Promise<UserEntity[]> {
+        return this.userRepository.find({
+            select: {
+                id: true,
+                nickname: true,
+                thumbnail: true,
+                introduce: true
+            }
+        });
+    }
 }
