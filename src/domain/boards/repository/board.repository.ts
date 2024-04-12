@@ -6,14 +6,16 @@ import { CreateBoardDTO } from '../dto/create.board.dto';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
 import { ReadBoardDTO } from '../dto/read.board.dto';
 import { ReadTagDTO } from 'src/domain/tags/dto/read.tag.dto';
-import { TagEntity } from 'src/domain/tags/repository/tag.entity';
 import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
+import { BoardLikeEntity } from './board.like.entity';
 
 @Injectable()
 export class BoardRepository {
     constructor(
         @InjectRepository(BoardEntity)
         private readonly boardRepository: Repository<BoardEntity>,
+        @InjectRepository(BoardLikeEntity)
+        private readonly boardLikeRepository: Repository<BoardLikeEntity>,
         @InjectRepository(TagMappingEntity)
         private readonly tagMappingRepository: Repository<TagMappingEntity>
     ) {}
@@ -45,16 +47,19 @@ export class BoardRepository {
     }
 
     /**
-     * 게시글 목록 전체를 불러오도록 한다.
-     * @TODO 페이징, 검색기능 생각해서 추가할 것
+     * 게시글 목록을 불러오도록 한다.
      */
-    async listAll(): Promise<ReadBoardDTO[]> {
+    async list(page: number, limit: number): Promise<ReadBoardDTO[]> {
+        const offset = (page - 1) * limit;
+
         const boardEntities = await this.boardRepository
             .createQueryBuilder('board')
             .leftJoinAndSelect('board.tagMappings', 'tagMappings')
             .leftJoinAndSelect('tagMappings.tag', 'tag')
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
             .orderBy('board.board_no', 'DESC')
+            .skip(offset)
+            .take(limit)
             .getMany();
 
         const listBoardDTO = boardEntities.map((boardItem) => {
@@ -69,8 +74,6 @@ export class BoardRepository {
 
             return readBoardDTO;
         });
-
-        console.log(listBoardDTO);
 
         return listBoardDTO;
     }
@@ -135,5 +138,23 @@ export class BoardRepository {
      */
     async delete(board_no: number): Promise<object> {
         return this.boardRepository.delete({ board_no });
+    }
+
+    /**
+     * 포스트 번호와 ip를 저장하도록 한다.
+     */
+    async saveLike(board_no: number, ip: string) {
+        const boardLikeEntity = this.boardLikeRepository.create({ board: { board_no: board_no }, ip: ip });
+
+        return this.boardLikeRepository.save(boardLikeEntity);
+    }
+
+    /**
+     * 포스트 번호와 아이피를 바탕으로 like 요소를 가져오도록 한다.
+     */
+    async getLike(board_no: number, ip: string) {
+        return this.boardLikeRepository.findOne({
+            where: { board: { board_no: board_no }, ip: ip }
+        });
     }
 }

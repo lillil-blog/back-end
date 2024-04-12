@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Ip, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { BoardEntity } from '../repository/board.entity';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { BoardService } from '../service/board.service';
@@ -8,6 +8,7 @@ import {
     ApiBody,
     ApiOperation,
     ApiParam,
+    ApiQuery,
     ApiResponse,
     ApiTags,
     ApiUnauthorizedResponse
@@ -37,11 +38,13 @@ export class BoardController {
     @Get('/')
     @ApiOperation({
         summary: '글 목록',
-        description: '모든 글 목록을 불러옵니다.'
+        description: '해당 페이지의 글 목록을 가져옵니다. (page default = 1)'
     })
+    @ApiQuery({ name: 'number', description: '불러올 페이지 번호', example: 2 })
     @ApiResponse({ status: 200, description: '성공적으로 글 목록을 불러왔습니다.' })
-    async listBoards(): Promise<ReadBoardDTO[]> {
-        return this.boardService.listAllBoard();
+    async listBoards(@Query('page') page: number = 1): Promise<ReadBoardDTO[]> {
+        // (페이지번호, 가져올 개수)
+        return this.boardService.listBoard(page, 6);
     }
 
     @Get('/:board_no')
@@ -87,8 +90,20 @@ export class BoardController {
         return this.boardService.deleteBoard(board_no);
     }
 
-    /**
-     * @TODO
-     * board_like 추가할것
-     */
+    @Post('/:board_no/like')
+    @ApiOperation({
+        summary: '글 좋아요 등록',
+        description:
+            '1인당 1개의 글에 한 번만 좋아요 등록이 가능하도록 접속자의 ip(req) 정보와 board_no를 파라미터로 받습니다.'
+    })
+    @ApiParam({
+        name: 'board_no',
+        description: '좋아요 등록할 포스트의 번호',
+        example: 42
+    })
+    @ApiResponse({ status: 201, description: '성공적으로 해당 글에 좋아요를 등록했습니다.' })
+    @ApiResponse({ status: 401, description: '이미 좋아요를 등록했습니다.' })
+    async likeBoard(@Param('board_no') board_no: number, @Ip() ip: string) {
+        return this.boardService.likeBoard(board_no, ip);
+    }
 }
