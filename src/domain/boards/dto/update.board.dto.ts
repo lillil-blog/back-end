@@ -30,4 +30,9 @@ export class UpdateBoardDTO {
     @IsOptional()
     @IsString()
     thumbnail?: string;
+
+    @ApiPropertyOptional({ description: '등록할 태그들의 PK 번호', example: [1, 2] })
+    @IsOptional()
+    @IsNumber()
+    tags?: number[];
 }

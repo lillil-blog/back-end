@@ -18,9 +18,9 @@ export class UserRepository {
      * 생략되어 업데이트가 수행된다.
      */
     async save(userDTO: CreateUserDTO | UpdateUserDTO): Promise<UserEntity> {
-        const UserEntity = this.userRepository.create(userDTO);
+        const userEntity = this.userRepository.create(userDTO);
 
-        return this.userRepository.save(UserEntity);
+        return this.userRepository.save(userEntity);
     }
 
     /**
@@ -38,6 +38,17 @@ export class UserRepository {
     async readByUserNo(user_no: number): Promise<UserEntity> {
         return this.userRepository.findOne({
             where: { user_no: user_no }
+        });
+    }
+
+    async listAllUsers(): Promise<UserEntity[]> {
+        return this.userRepository.find({
+            select: {
+                id: true,
+                nickname: true,
+                thumbnail: true,
+                introduce: true
+            }
         });
     }
 }

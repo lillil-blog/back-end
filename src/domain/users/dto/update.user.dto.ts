@@ -1,10 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiHideProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDTO {
-    @ApiProperty({ description: '변경할 유저의 ID', example: 'test' })
-    @IsString()
-    id: string;
+    @ApiHideProperty()
+    user_no: number;
 
     @ApiPropertyOptional({ description: '변경할 패스워드', example: 'modifiedPassword' })
     @IsOptional()

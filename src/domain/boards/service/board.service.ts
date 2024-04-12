@@ -4,6 +4,8 @@ import { BoardRepository } from '../repository/board.repository';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
 import { BoardEntity } from '../repository/board.entity';
 import { ReadBoardDTO } from '../dto/read.board.dto';
+import { CheckerUtil } from 'src/utils/checker.util';
+import { ExceptionUtil } from 'src/utils/exception.util';
 
 @Injectable()
 export class BoardService {
@@ -12,7 +14,7 @@ export class BoardService {
     /**
      * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
      */
-    async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity> {
+    async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
         return this.boardRepository.save(boardDTO);
     }
 
@@ -22,19 +24,16 @@ export class BoardService {
     async readBoard(board_no: number): Promise<ReadBoardDTO> {
         const readBoardDTO = await this.boardRepository.read(board_no);
 
-        if (!readBoardDTO) {
-            throw new NotFoundException('Post not found!');
-        }
+        ExceptionUtil.check(CheckerUtil.isNotNull(readBoardDTO), 'Post not found!');
 
         return readBoardDTO;
     }
 
     /**
      * 글 목록을 불러오도록 한다.
-     * @TODO 페이징, 검색 생각해볼것
      */
-    async listAllBoard(): Promise<ReadBoardDTO[]> {
-        return this.boardRepository.listAll();
+    async listBoard(page: number, limit: number): Promise<ReadBoardDTO[]> {
+        return this.boardRepository.list(page, limit);
     }
 
     /**
@@ -43,10 +42,20 @@ export class BoardService {
     async deleteBoard(board_no: number): Promise<object> {
         const boardEntity = await this.boardRepository.read(board_no);
 
-        if (!boardEntity) {
-            throw new NotFoundException('Post not found!');
-        }
+        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
 
         return this.boardRepository.delete(board_no);
+    }
+
+    /**
+     * 테이블을 조회하여 내역이 없으면 좋아요 테이블에 추가하도록 한다.
+     */
+    async likeBoard(board_no: number, ip: string) {
+        const requestIpv4 = ip.replace('::ffff:', '');
+        const boardLikeEntity = await this.boardRepository.getLike(board_no, requestIpv4);
+
+        ExceptionUtil.check(CheckerUtil.isNull(boardLikeEntity), 'Already liked it!');
+
+        return this.boardRepository.saveLike(board_no, requestIpv4);
     }
 }
