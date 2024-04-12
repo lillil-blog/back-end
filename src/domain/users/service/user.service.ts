@@ -44,7 +44,7 @@ export class UserService {
             this.configService.get('AUTH_REFRESH_EXPIRATION_TIME')
         );
 
-        const tokenObject: object = {
+        const tokenObject = {
             accessToken: accessToken,
             refreshToken: refreshToken
         };
@@ -133,9 +133,11 @@ export class UserService {
             this.configService.get('AUTH_REFRESH_EXPIRATION_TIME')
         );
 
-        return {
+        const tokenObject = {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken
         };
+
+        return tokenObject;
     }
 }
