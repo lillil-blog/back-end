@@ -52,15 +52,18 @@ export class BoardRepository {
     async list(page: number, limit: number): Promise<ReadBoardDTO[]> {
         const offset = (page - 1) * limit;
 
-        const boardEntities = await this.boardRepository
+        const boardListQuery = this.boardRepository
             .createQueryBuilder('board')
             .leftJoinAndSelect('board.tagMappings', 'tagMappings')
             .leftJoinAndSelect('tagMappings.tag', 'tag')
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
-            .orderBy('board.board_no', 'DESC')
-            .skip(offset)
-            .take(limit)
-            .getMany();
+            .orderBy('board.board_no', 'DESC');
+
+        if (page > 0) {
+            boardListQuery.skip(offset).take(limit);
+        }
+
+        const boardEntities = await boardListQuery.getMany();
 
         const listBoardDTO = boardEntities.map((boardItem) => {
             const readTagDTOArray: ReadTagDTO[] = boardItem.tagMappings.map((tagItem) => tagItem.tag);
