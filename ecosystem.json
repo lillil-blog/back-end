@@ -1,0 +1,15 @@
+{
+    "apps": [
+        {
+            "name": "DSTB_Test",
+
+            "exec_mode": "cluster",
+
+            "script": "dist/main.js",
+
+            "autorestart": true,
+
+            "wait_ready": true
+        }
+    ]
+}
