@@ -118,8 +118,8 @@ export class BoardRepository {
     async read(board_no: number): Promise<ReadBoardDTO> {
         const boardEntity = await this.boardRepository
             .createQueryBuilder('board')
-            .innerJoinAndSelect('board.tagMappings', 'tagMappings')
-            .innerJoinAndSelect('tagMappings.tag', 'tag')
+            .leftJoinAndSelect('board.tagMappings', 'tagMappings')
+            .leftJoinAndSelect('tagMappings.tag', 'tag')
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
             .where('board.board_no = :board_no', { board_no })
             .getOne();

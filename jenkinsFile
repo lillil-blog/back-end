@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 2, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('clone') {
+            step {
+                echo "Cloning Git Repository..."
+                checkout scm
+            }
+        }
+
+        stage('build') {
+            step {
+                echo "Building Project..."
+                dir('apps/jenkins_build') {
+                    sh 'rm -rf *'
+                    nodejs('NodeJS 20.10.0') {
+                        sh '''
+                            npm install --force
+                            npm run build
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Deploying to shared volume..."
+                dir('apps/jenkins_build') {
+                    sh '''
+                        cp -r dist/* /apps/dstb/server/dist/
+                    '''
+                }
+            }
+        }
+    }
+}
