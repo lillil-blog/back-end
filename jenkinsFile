@@ -7,14 +7,14 @@ pipeline {
 
     stages {
         stage('clone') {
-            step {
+            steps {
                 echo "Cloning Git Repository..."
                 checkout scm
             }
         }
 
         stage('build') {
-            step {
+            steps {
                 echo "Building Project..."
                 dir('apps/jenkins_build') {
                     sh 'rm -rf *'
