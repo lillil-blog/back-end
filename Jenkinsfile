@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DEPLOY_PATH = '/apps/dstb/server'
-    }
-
     options {
         timeout(time: 2, unit: 'MINUTES')
     }
@@ -13,9 +9,12 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-                sh 'cd ${env.DEPLOY_PATH}'
-                sh 'npx pm2 stop all'
-                checkout scm
+
+                dir('/apps/dstb/server') {
+                    sh 'npx pm2 stop all'
+
+                    checkout scm
+                }
             }
         }
 
@@ -23,15 +22,14 @@ pipeline {
             steps {
                 echo "Building Project..."
 
-                sh 'cd ${env.DEPLOY_PATH}'
+                dir('/apps/dstb/server') {
+                    sh '''
+                    npm install --force
+                    npm run build
 
-                sh '''
-                npm install --force
-                npm run build
-
-                npx pm2 start all
-                '''
-                
+                    npx pm2 start all
+                    '''
+                }
             }
         }
     }
@@ -39,3 +37,4 @@ pipeline {
 // 젠킨스 테스트
 // 1
 // 2
+// 3
