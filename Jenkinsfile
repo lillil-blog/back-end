@@ -9,11 +9,12 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
+                nodejs('NodeJS 20.10.0') {
+                    dir('/apps/dstb/server') {
+                        sh 'npx pm2 stop all'
 
-                dir('/apps/dstb/server') {
-                    sh 'npx pm2 stop all'
-
-                    checkout scm
+                        checkout scm
+                    }
                 }
             }
         }
@@ -21,14 +22,15 @@ pipeline {
         stage('build') {
             steps {
                 echo "Building Project..."
+                nodejs('NodeJS 20.10.0') {
+                    dir('/apps/dstb/server') {
+                        sh '''
+                        npm install --force
+                        npm run build
 
-                dir('/apps/dstb/server') {
-                    sh '''
-                    npm install --force
-                    npm run build
-
-                    npx pm2 start all
-                    '''
+                        npx pm2 start all
+                        '''
+                    }
                 }
             }
         }
