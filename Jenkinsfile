@@ -1,6 +1,9 @@
 pipeline {
-    // 테스트중
     agent any
+
+    environment {
+        DEPLOY_PATH = '/apps/dstb/server'
+    }
 
     options {
         timeout(time: 2, unit: 'MINUTES')
@@ -10,28 +13,27 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-                checkout scm
+
+                dir('${env.DEPLOY_PATH}') {
+                    sh 'npx pm2 stop all'
+
+                    checkout scm
+                }
             }
         }
 
         stage('build') {
             steps {
                 echo "Building Project..."
-                nodejs('NodeJS 20.10.0') {
+
+                dir('${env.DEPLOY_PATH}') {
                     sh '''
-                        npm install --force
-                        npm run build
+                    npm install --force
+                    npm run build
+
+                    npx pm2 start all
                     '''
                 }
-            }
-        }
-
-        stage('deploy') {
-            steps {
-                echo "Deploying to shared volume..."
-                sh '''
-                    cp -rf ./dist /apps/jenkins_build
-                '''
             }
         }
     }

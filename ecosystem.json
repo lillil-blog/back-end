@@ -9,7 +9,7 @@
 
             "autorestart": true,
 
-            "wait_ready": true
+            "restart_delay": 3000
         }
     ]
 }
