@@ -11,6 +11,7 @@ pipeline {
                 echo "Cloning Git Repository..."
                 nodejs('NodeJS 20.10.0') {
                     dir('/apps/dstb/server') {
+                        sh 'docker exec dstb_test_back npx pm2 list'
                         checkout scm
                     }
                 }
