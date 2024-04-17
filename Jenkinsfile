@@ -30,7 +30,7 @@ pipeline {
             steps {
                 echo "Deploying to shared volume..."
                 sh '''
-                    cp ./dist /apps/jenkins_build
+                    cp -rf ./dist /apps/jenkins_build
                 '''
             }
         }
