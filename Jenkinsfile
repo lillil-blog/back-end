@@ -13,12 +13,9 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-
-                dir('${env.DEPLOY_PATH}') {
-                    sh 'npx pm2 stop all'
-
-                    checkout scm
-                }
+                sh 'cd ${env.DEPLOY_PATH}'
+                sh 'npx pm2 stop all'
+                checkout scm
             }
         }
 
@@ -26,17 +23,19 @@ pipeline {
             steps {
                 echo "Building Project..."
 
-                dir('${env.DEPLOY_PATH}') {
-                    sh '''
-                    npm install --force
-                    npm run build
+                sh 'cd ${env.DEPLOY_PATH}'
 
-                    npx pm2 start all
-                    '''
-                }
+                sh '''
+                npm install --force
+                npm run build
+
+                npx pm2 start all
+                '''
+                
             }
         }
     }
 }
 // 젠킨스 테스트
 // 1
+// 2
