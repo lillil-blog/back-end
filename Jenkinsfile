@@ -12,9 +12,6 @@ pipeline {
                 dir('/apps/dstb/server') {
                     checkout scm
                 }
-                script {
-                    sh 'docker exec dstb_test_back npx pm2 list'
-                }
             }
         }
 

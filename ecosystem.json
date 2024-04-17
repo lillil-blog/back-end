@@ -14,7 +14,7 @@
                 "ignore_watch": ["node_modules", "logs", "public"]
             },
 
-            "restart_delay": 5000
+            "restart_delay": 60000
         }
     ]
 }
