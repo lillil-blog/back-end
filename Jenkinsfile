@@ -10,7 +10,6 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-                sh 'pwd'
                 checkout scm
             }
         }
@@ -20,7 +19,6 @@ pipeline {
                 echo "Building Project..."
                 nodejs('NodeJS 20.10.0') {
                     sh '''
-                        pwd
                         npm install --force
                         npm run build
                     '''
@@ -28,13 +26,11 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('deploy') {
             steps {
                 echo "Deploying to shared volume..."
                 sh '''
-                    pwd
-                    cd /apps/jenkins_build
-                    pwd
+                    cp ./dist /apps/jenkins_build
                 '''
             }
         }
