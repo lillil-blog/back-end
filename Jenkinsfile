@@ -33,7 +33,8 @@ pipeline {
                 echo "Deploying to shared volume..."
                 sh '''
                     pwd
-                    cp -rf ./ /apps/jenkins_build
+                    cd /apps/jenkins_build
+                    pwd
                 '''
             }
         }
