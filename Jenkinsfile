@@ -9,11 +9,11 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-                nodejs('NodeJS 20.10.0') {
-                    dir('/apps/dstb/server') {
-                        sh 'docker exec dstb_test_back npx pm2 list'
-                        checkout scm
-                    }
+                dir('/apps/dstb/server') {
+                    checkout scm
+                }
+                script {
+                    sh 'docker exec dstb_test_back npx pm2 list'
                 }
             }
         }
