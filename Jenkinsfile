@@ -10,6 +10,7 @@ pipeline {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
+                sh 'pwd'
                 checkout scm
             }
         }
@@ -17,14 +18,12 @@ pipeline {
         stage('build') {
             steps {
                 echo "Building Project..."
-                dir('apps/jenkins_build') {
-                    sh 'rm -rf *'
-                    nodejs('NodeJS 20.10.0') {
-                        sh '''
-                            npm install --force
-                            npm run build
-                        '''
-                    }
+                nodejs('NodeJS 20.10.0') {
+                    sh '''
+                        pwd
+                        npm install --force
+                        npm run build
+                    '''
                 }
             }
         }
@@ -32,12 +31,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying to shared volume..."
-                dir('apps/jenkins_build') {
-                    sh '''
-                        pwd
-                        cp -r /apps/jenkins_build/dist /apps/dstb/server/dist
-                    '''
-                }
+                sh '''
+                    pwd
+                    cp -rf ./ /apps/jenkins_build
+                '''
             }
         }
     }
