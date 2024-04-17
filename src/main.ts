@@ -13,7 +13,6 @@ async function bootstrap() {
     app.use(cookieParser());
 
     await app.listen(process.env.PORT);
-    //Jenkins 테스트용 주석(지울것)
 }
 
 bootstrap();
