@@ -34,6 +34,7 @@ pipeline {
                 echo "Deploying to shared volume..."
                 dir('apps/jenkins_build') {
                     sh '''
+                        pwd
                         cp -r /apps/jenkins_build/dist /apps/dstb/server/dist
                     '''
                 }
