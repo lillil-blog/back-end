@@ -8,6 +8,7 @@ import { ReadBoardDTO } from '../dto/read.board.dto';
 import { ReadTagDTO } from 'src/domain/tags/dto/read.tag.dto';
 import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
 import { BoardLikeEntity } from './board.like.entity';
+import { ListBoardDTO } from '../dto/list.board.dto';
 
 @Injectable()
 export class BoardRepository {
@@ -49,34 +50,29 @@ export class BoardRepository {
     /**
      * 게시글 목록을 불러오도록 한다.
      */
-    async list(page: number, limit: number): Promise<ReadBoardDTO[]> {
+    async list(page: number, limit: number): Promise<ListBoardDTO> {
         const offset = (page - 1) * limit;
 
         const boardListQuery = this.boardRepository
             .createQueryBuilder('board')
-            .leftJoinAndSelect('board.tagMappings', 'tagMappings')
-            .leftJoinAndSelect('tagMappings.tag', 'tag')
-            .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
+            .select(['board.thumbnail', 'board.title', 'board.summary', 'board.writer', 'board.created_at'])
+            // .leftJoinAndSelect('board.tagMappings', 'tagMappings') 태그 아티클 검색용으로 일단 놔둠
+            // .leftJoinAndSelect('tagMappings.tag', 'tag')
             .orderBy('board.board_no', 'DESC');
 
         if (page > 0) {
             boardListQuery.skip(offset).take(limit);
         }
 
-        const boardEntities = await boardListQuery.getMany();
+        const [boardEntities, totalCnt] = await Promise.all([
+            boardListQuery.getMany(),
+            this.boardRepository.createQueryBuilder('board').getCount()
+        ]);
 
-        const listBoardDTO = boardEntities.map((boardItem) => {
-            const readTagDTOArray: ReadTagDTO[] = boardItem.tagMappings.map((tagItem) => tagItem.tag);
-            const readBoardDTO: ReadBoardDTO = {
-                tags: readTagDTOArray,
-                ...(() => {
-                    delete boardItem.tagMappings;
-                    return boardItem;
-                })()
-            };
-
-            return readBoardDTO;
-        });
+        const listBoardDTO: ListBoardDTO = {
+            boards: boardEntities,
+            totalcnt: totalCnt
+        };
 
         return listBoardDTO;
     }

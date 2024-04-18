@@ -15,6 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { ReadBoardDTO } from '../dto/read.board.dto';
 import { JWTAccessGuard } from 'src/middleware/auth/guard/jwt.access.guard';
+import { ListBoardDTO } from '../dto/list.board.dto';
 
 @Controller('/boards')
 @ApiTags('Board API')
@@ -42,7 +43,7 @@ export class BoardController {
     })
     @ApiQuery({ name: 'number', description: '불러올 페이지 번호', example: 2 })
     @ApiResponse({ status: 200, description: '성공적으로 글 목록을 불러왔습니다.' })
-    async listBoards(@Query('page') page: number = 0): Promise<ReadBoardDTO[]> {
+    async listBoards(@Query('page') page: number = 0): Promise<ListBoardDTO> {
         // (페이지번호, 가져올 개수)
         return this.boardService.listBoard(page, 6);
     }

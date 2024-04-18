@@ -6,6 +6,7 @@ import { BoardEntity } from '../repository/board.entity';
 import { ReadBoardDTO } from '../dto/read.board.dto';
 import { CheckerUtil } from 'src/utils/checker.util';
 import { ExceptionUtil } from 'src/utils/exception.util';
+import { ListBoardDTO } from '../dto/list.board.dto';
 
 @Injectable()
 export class BoardService {
@@ -32,7 +33,7 @@ export class BoardService {
     /**
      * 글 목록을 불러오도록 한다.
      */
-    async listBoard(page: number, limit: number): Promise<ReadBoardDTO[]> {
+    async listBoard(page: number, limit: number): Promise<ListBoardDTO> {
         return this.boardRepository.list(page, limit);
     }
 

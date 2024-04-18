@@ -15,7 +15,7 @@ import * as path from 'path';
                 password: configService.get('DB_PASSWORD'),
                 database: configService.get('DB_DATABASE'),
                 entities: [path.join(__dirname, '../domain/**/repository/*.entity.{ts,js}')],
-                synchronize: false, // 재시작 시 테이블 구조 항상 동기화
+                synchronize: true, // 재시작 시 테이블 구조 항상 동기화
                 logging: false // DB작업 콘솔에 로그 출력
             })
         })

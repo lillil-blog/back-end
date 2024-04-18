@@ -26,6 +26,9 @@ export class BoardEntity {
     @Column()
     title: string;
 
+    @Column()
+    summary: string;
+
     @Column({ type: 'text' })
     content: string;
 
