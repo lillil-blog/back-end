@@ -55,7 +55,16 @@ export class BoardRepository {
 
         const boardListQuery = this.boardRepository
             .createQueryBuilder('board')
-            .select(['board.thumbnail', 'board.title', 'board.summary', 'board.writer', 'board.created_at'])
+            .leftJoin('board.writer', 'writer')
+            .select([
+                'board.board_no',
+                'board.thumbnail',
+                'board.title',
+                'board.summary',
+                'board.created_at',
+                'writer.id',
+                'writer.nickname'
+            ])
             // .leftJoinAndSelect('board.tagMappings', 'tagMappings') 태그 아티클 검색용으로 일단 놔둠
             // .leftJoinAndSelect('tagMappings.tag', 'tag')
             .orderBy('board.board_no', 'DESC');
