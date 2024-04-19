@@ -1,15 +1,19 @@
+def DEPLOY_URL = '/apps/dstb/server'
+def SSH_KEY = '~/.ssh/jenkins_rsa'
+def TARGET_SERVER = 'root@172.17.0.4'
+
 pipeline {
     agent any
 
     options {
-        timeout(time: 2, unit: 'MINUTES')
+        timeout(time: 3, unit: 'MINUTES')
     }
 
     stages {
         stage('clone') {
             steps {
                 echo "Cloning Git Repository..."
-                dir('/apps/dstb/server') {
+                dir('${DEPLOY_URL}') {
                     checkout scm
                 }
             }
@@ -18,14 +22,14 @@ pipeline {
         stage('build') {
             steps {
                 echo "Building Project..."
-                nodejs('NodeJS 20.10.0') {
-                    dir('/apps/dstb/server') {
-                        sh '''
-                        npm install --force
-                        npm run build
-                        '''
-                    }
-                }
+                sh 'ssh -i ${SSH_KEY} ${TARGET_SERVER} "cd /app/ && npm install --force && npm run build"'
+            }
+        }
+
+        stage('restart') {
+            steps {
+                echo "Restarting PM2 Process..."
+                sh 'ssh -i ${SSH_KEY} ${TARGET_SERVER} "cd /app/ && npx pm2 list && npx pm2 reload all && npx pm2 list"'
             }
         }
     }
