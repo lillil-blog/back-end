@@ -7,6 +7,7 @@ import { TagModule } from './modules/domain/tag.module';
 import { ServeStaticModule } from './modules/serve.static.module';
 import { RedisModule } from './modules/middleware/redis.module';
 import { RootModule } from './modules/domain/root.module';
+import { FileModule } from './modules/domain/file.module';
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { RootModule } from './modules/domain/root.module';
         TypeOrmModule,
         ServeStaticModule,
         RedisModule,
+        FileModule,
         RootModule,
         UserModule,
         BoardModule,

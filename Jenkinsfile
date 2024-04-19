@@ -1,6 +1,10 @@
 def DEPLOY_URL = "/apps/dstb/server"
+
+def GIT_TARGET_REPOSITORY = "https://github.com/lillil-blog/back-end.git"
+def GIT_TARGET_BRANCH = "dev"
+
 def SSH_KEY = "~/.ssh/jenkins_rsa"
-def TARGET_SERVER = "root@172.17.0.4"
+def SSH_TARGET_SERVER = "root@172.17.0.4"
 
 pipeline {
     agent any
@@ -14,7 +18,7 @@ pipeline {
             steps {
                 echo "Cloning Git Repository..."
                 dir("${DEPLOY_URL}") {
-                    checkout scm
+                    git branch: "${GIT_TARGET_BRANCH}", url: "${GIT_TARGET_REPOSITORY}"
                 }
             }
         }
