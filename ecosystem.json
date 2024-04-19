@@ -9,12 +9,7 @@
 
             "autorestart": true,
 
-            "watch": true,
-            "watch_options": {
-                "ignore_watch": ["node_modules", "logs", "public"]
-            },
-
-            "restart_delay": 60000
+            "watch": false
         }
     ]
 }
