@@ -1,17 +1,26 @@
-import { Controller, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { Controller, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import * as path from 'path';
 
 @Controller('/files')
 export class FileController {
+    private basePath = 'public';
+
     constructor() {}
 
-    @Post('/upload')
-    @UseInterceptors(FilesInterceptor('files'))
-    async pload(@UploadedFiles() files: Express.Multer.File[]) {
-        files.map((item) => console.log(item.path));
-        return { msg: 'succ' };
+    @Post('/users/upload')
+    @UseInterceptors(FileInterceptor('image'))
+    async userImageUpload(@UploadedFile() file: Express.Multer.File) {
+        const relativePath = path.relative(this.basePath, file.path);
+
+        return relativePath;
+    }
+
+    @Post('/boards/upload')
+    @UseInterceptors(FilesInterceptor('images'))
+    async boardImageUpload(@UploadedFiles() files: Express.Multer.File[]) {
+        const relativePaths = files.map((item) => path.relative(this.basePath, item.path));
+
+        return relativePaths;
     }
 }
-/**
- * @TODO 파일 컨트롤러랑 서비스 저장 이름, 방식, ext 등 생각해볼 것
- */
