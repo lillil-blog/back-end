@@ -5,7 +5,11 @@ import * as path from 'path';
 @Module({
     imports: [
         NestServeStaticModule.forRoot({
-            rootPath: path.join(__dirname, '../../public')
+            rootPath: path.join(__dirname, '../../public'),
+            serveRoot: '/public',
+            serveStaticOptions: {
+                index: false
+            }
         })
     ]
 })
