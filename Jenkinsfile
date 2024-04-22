@@ -26,14 +26,14 @@ pipeline {
         stage("build") {
             steps {
                 echo "Building Project..."
-                sh "ssh -i ${SSH_KEY} ${TARGET_SERVER} 'cd /app/ && npm install --force && npm run build'"
+                sh "ssh -i ${SSH_KEY} ${SSH_TARGET_SERVER} 'cd /app/ && npm install --force && npm run build'"
             }
         }
 
         stage("restart") {
             steps {
                 echo "Restarting PM2 Process..."
-                sh "ssh -i ${SSH_KEY} ${TARGET_SERVER} 'cd /app/ && npx pm2 list && npx pm2 reload all && npx pm2 list'"
+                sh "ssh -i ${SSH_KEY} ${SSH_TARGET_SERVER} 'cd /app/ && npx pm2 list && npx pm2 reload all && npx pm2 list'"
             }
         }
     }
