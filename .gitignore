@@ -1,4 +1,9 @@
 /dist
+
 /node_modules
+
 /public
+
+/logs
+
 .env
