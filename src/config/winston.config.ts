@@ -26,10 +26,9 @@ const dailyOptions = (level: string) => {
             }),
             winston.format.printf((info) => {
                 const { level, timestamp, context, message, stack } = info;
+                const line = `[DSTB] ${level.toUpperCase()} ${timestamp} [${context}] ${message}`;
 
-                return stack
-                    ? `[DSTB] ${level.toUpperCase()} ${timestamp} [${context}] ${message}\n${stack}`
-                    : `[DSTB] ${level.toUpperCase()} ${timestamp} [${context}] ${message}`;
+                return stack ? `${line}\n${stack}` : `${line}`;
             })
         )
     };
@@ -41,10 +40,12 @@ export const winstonLoggerConfig = WinstonModule.createLogger({
     transports: [
         // 콘솔에 찍어주기용
         new winston.transports.Console({
-            level: 'http',
+            level: 'silly',
             // format: winston.format.simple()
             format: winston.format.combine(
-                winston.format.timestamp(),
+                winston.format.timestamp({
+                    format: 'YYYY-MM-DD HH:mm:ss'
+                }),
                 winston.format.colorize(),
                 utilities.format.nestLike('DSTB', {
                     prettyPrint: true //nest에서 제공하는 옵션, 로그 가독성을 높임
