@@ -6,9 +6,10 @@ import { BoardLikeEntity } from 'src/domain/boards/repository/board.like.entity'
 import { BoardRepository } from 'src/domain/boards/repository/board.repository';
 import { BoardService } from 'src/domain/boards/service/board.service';
 import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
+import { RedisModule } from '../middleware/redis.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([BoardEntity, BoardLikeEntity, TagMappingEntity])],
+    imports: [TypeOrmModule.forFeature([BoardEntity, BoardLikeEntity, TagMappingEntity]), RedisModule],
     controllers: [BoardController],
     providers: [BoardService, BoardRepository],
     exports: []

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { BoardRepository } from '../repository/board.repository';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
@@ -7,15 +7,23 @@ import { ReadBoardDTO } from '../dto/read.board.dto';
 import { CheckerUtil } from 'src/utils/checker.util';
 import { ExceptionUtil } from 'src/utils/exception.util';
 import { ListBoardDTO } from '../dto/list.board.dto';
+import { RedisCacheService } from 'src/infrastructure/cache/service/redis.cache.service';
 
 @Injectable()
 export class BoardService {
-    constructor(private readonly boardRepository: BoardRepository) {}
+    constructor(
+        private readonly redisCacheService: RedisCacheService,
+        private readonly boardRepository: BoardRepository
+    ) {}
 
     /**
      * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
      */
     async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
+        const boardResult = await this.boardRepository.save(boardDTO);
+        if (CheckerUtil.isNotNull(boardResult)) {
+            this.redisCacheService.setBoard(boardResult as ReadBoardDTO);
+        }
         return this.boardRepository.save(boardDTO);
     }
 
@@ -23,11 +31,19 @@ export class BoardService {
      * 글 번호로 해당 글의 상세정보를 불러오도록 한다.
      */
     async readBoard(board_no: number): Promise<ReadBoardDTO> {
-        const readBoardDTO = await this.boardRepository.read(board_no);
+        const readBoardCache = await this.redisCacheService.getBoard(board_no);
 
-        ExceptionUtil.check(CheckerUtil.isNotNull(readBoardDTO), 'Post not found!');
+        if (CheckerUtil.isNull(readBoardCache)) {
+            const readBoardDTO = await this.boardRepository.read(board_no);
 
-        return readBoardDTO;
+            ExceptionUtil.check(CheckerUtil.isNotNull(readBoardDTO), 'Post not found!');
+
+            this.redisCacheService.setBoard(readBoardDTO);
+
+            return readBoardDTO;
+        }
+
+        return readBoardCache;
     }
 
     /**
@@ -44,6 +60,8 @@ export class BoardService {
         const boardEntity = await this.boardRepository.read(board_no);
 
         ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
+
+        this.redisCacheService.deleteBoard(board_no);
 
         return this.boardRepository.delete(board_no);
     }
