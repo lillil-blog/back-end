@@ -9,6 +9,8 @@ import { ReadTagDTO } from 'src/domain/tags/dto/read.tag.dto';
 import { TagMappingEntity } from 'src/domain/tags/repository/tag.mapping.entity';
 import { BoardLikeEntity } from './board.like.entity';
 import { ListBoardDTO } from '../dto/list.board.dto';
+import { ExceptionUtil } from 'src/utils/exception.util';
+import { CheckerUtil } from 'src/utils/checker.util';
 
 @Injectable()
 export class BoardRepository {
@@ -128,6 +130,8 @@ export class BoardRepository {
             .loadRelationCountAndMap('board.likecnt', 'board.boardLikes')
             .where('board.board_no = :board_no', { board_no })
             .getOne();
+
+        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
 
         const readTagDTOArray: ReadTagDTO[] = boardEntity.tagMappings.map((item) => item.tag);
         const readBoardDTO: ReadBoardDTO = {
