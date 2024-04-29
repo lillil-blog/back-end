@@ -18,6 +18,7 @@ export class BoardService {
 
     /**
      * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
+     * @deprecated
      */
     async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
         const boardResult = await this.boardRepository.save(boardDTO);
@@ -25,6 +26,28 @@ export class BoardService {
             this.redisCacheService.setBoard(boardResult as ReadBoardDTO);
         }
         return this.boardRepository.save(boardDTO);
+    }
+
+    /**
+     * CreateBoardDTO 형식의 데이터를 받아와 새 글을 생성하도록 한다.
+     */
+    async createBoard(createBoardDTO: CreateBoardDTO): Promise<BoardEntity | object> {
+        return this.boardRepository.save(createBoardDTO);
+    }
+
+    /**
+     * UpdateBoardDTO 형식의 데이터를 받아와 검증 후 존재할 시 데이터를 수정하도록 한다.
+     */
+    async updateBoard(updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity | object> {
+        const boardEntity = await this.boardRepository.read(updateBoardDTO.board_no);
+
+        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
+
+        const newBoardEntity = await this.boardRepository.save(updateBoardDTO);
+
+        this.redisCacheService.setBoard(newBoardEntity as ReadBoardDTO);
+
+        return newBoardEntity;
     }
 
     /**

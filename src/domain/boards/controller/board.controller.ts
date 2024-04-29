@@ -33,7 +33,7 @@ export class BoardController {
     @ApiResponse({ status: 201, description: '성공적으로 새 블로그 포스트를 등록했습니다.' })
     // @UseGuards(JWTAccessGuard)
     async createBoard(@Body() createBoardDTO: CreateBoardDTO): Promise<BoardEntity | object> {
-        return this.boardService.saveBoard(createBoardDTO);
+        return this.boardService.createBoard(createBoardDTO);
     }
 
     @Get('/')
@@ -72,7 +72,7 @@ export class BoardController {
     @ApiResponse({ status: 201, description: '성공적으로 해당 글의 정보를 변경했습니다.' })
     // @UseGuards(JWTAccessGuard)
     async modifyBoard(@Body() updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity | object> {
-        return this.boardService.saveBoard(updateBoardDTO);
+        return this.boardService.updateBoard(updateBoardDTO);
     }
 
     @Delete('/:board_no')
