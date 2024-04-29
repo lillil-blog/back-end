@@ -45,7 +45,7 @@ export class BoardService {
 
         const newBoardEntity = await this.boardRepository.save(updateBoardDTO);
 
-        this.redisCacheService.setBoard(newBoardEntity as ReadBoardDTO);
+        this.redisCacheService.setBoard(Object.assign(boardEntity, newBoardEntity) as ReadBoardDTO);
 
         return newBoardEntity;
     }
