@@ -11,6 +11,7 @@ export class CreateBoardDTO {
     content: string;
 
     @ApiProperty({ description: '글 한줄소개', example: '한줄설명입니다.' })
+    @IsOptional()
     @IsString()
     summary: string;
 
