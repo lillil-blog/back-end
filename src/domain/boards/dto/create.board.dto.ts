@@ -10,6 +10,10 @@ export class CreateBoardDTO {
     @IsString()
     content: string;
 
+    @ApiProperty({ description: '글 한줄소개', example: '한줄설명입니다.' })
+    @IsString()
+    summary: string;
+
     @ApiProperty({ description: '작성자', example: 'test' })
     @IsString()
     writer: string;
@@ -25,6 +29,6 @@ export class CreateBoardDTO {
 
     @ApiPropertyOptional({ description: '등록할 태그들의 PK 번호', example: [2, 3] })
     @IsOptional()
-    @IsNumber()
+    @IsNumber({}, { each: true })
     tags: number[];
 }
