@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from './board.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
 import { ReadBoardDTO } from '../dto/read.board.dto';
@@ -19,37 +19,51 @@ export class BoardRepository {
         private readonly boardRepository: Repository<BoardEntity>,
         @InjectRepository(BoardLikeEntity)
         private readonly boardLikeRepository: Repository<BoardLikeEntity>,
-        @InjectRepository(TagMappingEntity)
-        private readonly tagMappingRepository: Repository<TagMappingEntity>
+        private readonly dataSource: DataSource
     ) {}
 
     /**
      * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
      * 받아오는 DTO 형식에 따라 처리되며 업데이트 시 포함되지 않은 필드값은
      * 생략되어 업데이트가 수행된다.
+     *
+     * 트랜잭션을 사용해서 한 번에 커밋 작업을 하여 작업 시간을 단축시키도록 한다.
      */
     async save(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
         const { writer, tags, ...rest } = boardDTO;
-        const boardEntity = this.boardRepository.create({
-            ...rest,
-            ...(writer ? { writer: { id: writer } } : {})
-        });
 
-        const boardResult = await this.boardRepository.save(boardEntity);
+        // 트랜잭션 시작
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.startTransaction();
 
-        if (tags?.length) {
-            const tagMappings = await Promise.all(
-                tags.map((tag) =>
-                    this.tagMappingRepository.save({
-                        board: { board_no: boardResult.board_no },
-                        tag: { tag_no: tag }
-                    })
-                )
-            );
-            return { board: boardResult, tagMapping: tagMappings };
+        try {
+            const boardEntity = queryRunner.manager.create(BoardEntity, {
+                ...rest,
+                ...(writer ? { writer: { id: writer } } : {})
+            });
+
+            const boardResult = await queryRunner.manager.save(boardEntity);
+
+            if (tags?.length) {
+                const tagMappings = await Promise.all(
+                    tags.map((tag) =>
+                        queryRunner.manager.save(TagMappingEntity, {
+                            board: { board_no: boardResult.board_no },
+                            tag: { tag_no: tag }
+                        })
+                    )
+                );
+                await queryRunner.commitTransaction(); // 트랜잭션 커밋
+                return { board: boardResult, tagMapping: tagMappings };
+            }
+
+            await queryRunner.commitTransaction(); // 트랜잭션 커밋
+            return boardResult;
+        } catch (error) {
+            await queryRunner.rollbackTransaction(); // 오류 발생시 롤백
+        } finally {
+            await queryRunner.release(); // 리소스 해제
         }
-
-        return boardResult;
     }
 
     /**
