@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateBoardDTO } from '../dto/create.board.dto';
 import { BoardRepository } from '../repository/board.repository';
 import { UpdateBoardDTO } from '../dto/update.board.dto';
@@ -17,22 +17,14 @@ export class BoardService {
     ) {}
 
     /**
-     * 새 글 작성과 기존 글 업데이트를 수행하도록 한다.
-     * @deprecated
-     */
-    async saveBoard(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
-        const boardResult = await this.boardRepository.save(boardDTO);
-        if (CheckerUtil.isNotNull(boardResult)) {
-            this.redisCacheService.setBoard(boardResult as ReadBoardDTO);
-        }
-        return this.boardRepository.save(boardDTO);
-    }
-
-    /**
      * CreateBoardDTO 형식의 데이터를 받아와 새 글을 생성하도록 한다.
      */
     async createBoard(createBoardDTO: CreateBoardDTO): Promise<BoardEntity | object> {
-        return this.boardRepository.save(createBoardDTO);
+        const readBoardDTO: ReadBoardDTO = (await this.boardRepository.save(createBoardDTO)) as ReadBoardDTO;
+
+        this.redisCacheService.setBoard(readBoardDTO);
+
+        return readBoardDTO;
     }
 
     /**
@@ -41,7 +33,7 @@ export class BoardService {
     async updateBoard(updateBoardDTO: UpdateBoardDTO): Promise<BoardEntity | object> {
         const boardEntity = await this.boardRepository.read(updateBoardDTO.board_no);
 
-        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
+        ExceptionUtil.check(CheckerUtil.isNull(boardEntity), 'Post not found!', HttpStatus.NOT_FOUND);
 
         const newBoardEntity = await this.boardRepository.save(updateBoardDTO);
 
@@ -59,7 +51,7 @@ export class BoardService {
         if (CheckerUtil.isNull(readBoardCache)) {
             const readBoardDTO = await this.boardRepository.read(board_no);
 
-            ExceptionUtil.check(CheckerUtil.isNotNull(readBoardDTO), 'Post not found!');
+            ExceptionUtil.check(CheckerUtil.isNull(readBoardDTO), 'Post not found!', HttpStatus.NOT_FOUND);
 
             this.redisCacheService.setBoard(readBoardDTO);
 
@@ -82,7 +74,7 @@ export class BoardService {
     async deleteBoard(board_no: number): Promise<object> {
         const boardEntity = await this.boardRepository.read(board_no);
 
-        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
+        ExceptionUtil.check(CheckerUtil.isNull(boardEntity), 'Post not found!', HttpStatus.NOT_FOUND);
 
         this.redisCacheService.deleteBoard(board_no);
 
@@ -96,7 +88,7 @@ export class BoardService {
         const requestIpv4 = ip.replace('::ffff:', '');
         const boardLikeEntity = await this.boardRepository.getLike(board_no, requestIpv4);
 
-        ExceptionUtil.check(CheckerUtil.isNull(boardLikeEntity), 'Already liked it!');
+        ExceptionUtil.check(CheckerUtil.isNotNull(boardLikeEntity), 'Already liked it!', HttpStatus.FORBIDDEN);
 
         return this.boardRepository.saveLike(board_no, requestIpv4);
     }

@@ -1,9 +1,9 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ExceptionUtil {
-    static check(condition: boolean, message: string) {
-        if (!condition) {
-            throw new UnauthorizedException(message);
+    static check(condition: boolean, message: string, status: HttpStatus) {
+        if (condition) {
+            throw new HttpException(message, status);
         }
     }
 }

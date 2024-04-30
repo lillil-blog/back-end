@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from './board.entity';
 import { Repository } from 'typeorm';
@@ -29,23 +29,26 @@ export class BoardRepository {
      * 생략되어 업데이트가 수행된다.
      */
     async save(boardDTO: CreateBoardDTO | UpdateBoardDTO): Promise<BoardEntity | object> {
-        const { writer, ...rest } = boardDTO;
+        const { writer, tags, ...rest } = boardDTO;
         const boardEntity = this.boardRepository.create({
             ...rest,
-            ...(writer && { writer: { id: writer } })
+            ...(writer ? { writer: { id: writer } } : {})
         });
 
         const boardResult = await this.boardRepository.save(boardEntity);
 
-        if (boardDTO.tags) {
-            const tagTasks = boardDTO.tags.map((item) =>
-                this.tagMappingRepository.save({ board: { board_no: boardResult.board_no }, tag: { tag_no: item } })
+        if (tags?.length) {
+            const tagMappings = await Promise.all(
+                tags.map((tag) =>
+                    this.tagMappingRepository.save({
+                        board: { board_no: boardResult.board_no },
+                        tag: { tag_no: tag }
+                    })
+                )
             );
-
-            const tagMappingResult = await Promise.all(tagTasks);
-
-            return Object.assign({ board: boardResult }, { tagMapping: tagMappingResult });
+            return { board: boardResult, tagMapping: tagMappings };
         }
+
         return boardResult;
     }
 
@@ -131,7 +134,7 @@ export class BoardRepository {
             .where('board.board_no = :board_no', { board_no })
             .getOne();
 
-        ExceptionUtil.check(CheckerUtil.isNotNull(boardEntity), 'Post not found!');
+        ExceptionUtil.check(CheckerUtil.isNull(boardEntity), 'Post not found!', HttpStatus.NOT_FOUND);
 
         const readTagDTOArray: ReadTagDTO[] = boardEntity.tagMappings.map((item) => item.tag);
         const readBoardDTO: ReadBoardDTO = {

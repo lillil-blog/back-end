@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { TagRepository } from '../repository/tag.repository';
 import { CreateTagDTO } from '../dto/create.tag.dto';
 import { TagEntity } from '../repository/tag.entity';
@@ -16,7 +16,7 @@ export class TagService {
     async createTag(createTagDTO: CreateTagDTO): Promise<TagEntity> {
         const tagEntity = await this.tagRepository.readByName(createTagDTO.name);
 
-        ExceptionUtil.check(CheckerUtil.isDefined(tagEntity), 'Tag name is already exist!');
+        ExceptionUtil.check(CheckerUtil.isDefined(tagEntity), 'Tag name is already exist!', HttpStatus.CONFLICT);
 
         return this.tagRepository.create(createTagDTO);
     }
@@ -35,7 +35,7 @@ export class TagService {
     async deleteTag(tag_no: number): Promise<object> {
         const tagEntity = await this.tagRepository.readByTagNo(tag_no);
 
-        ExceptionUtil.check(CheckerUtil.isNotNull(tagEntity), 'Tag not found!');
+        ExceptionUtil.check(CheckerUtil.isNull(tagEntity), 'Tag not found!', HttpStatus.NOT_FOUND);
 
         return this.tagRepository.delete(tag_no);
     }

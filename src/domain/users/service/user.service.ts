@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { CreateUserDTO } from '../dto/create.user.dto';
 import { UserEntity } from '../repository/user.entity';
@@ -26,10 +26,10 @@ export class UserService {
      */
     async loginUser(loginUserDTO: LoginUserDTO) {
         const user = await this.userRepository.readById(loginUserDTO.id);
-        ExceptionUtil.check(CheckerUtil.isNotNull(user), 'User not found!');
+        ExceptionUtil.check(CheckerUtil.isNull(user), 'User not found!', HttpStatus.NOT_FOUND);
 
         const passwordCompare = await CommonUtil.compareHash(loginUserDTO.password, user.password);
-        ExceptionUtil.check(passwordCompare, 'User not found!');
+        ExceptionUtil.check(!passwordCompare, 'User not found!', HttpStatus.NOT_FOUND);
 
         const accessToken = await this.authService.generateAccessToken({ user_no: user.user_no, id: user.id });
         const refreshToken = await this.authService.generateRefreshToken({
@@ -58,7 +58,11 @@ export class UserService {
     async createUser(createUserDTO: CreateUserDTO): Promise<UserEntity> {
         const userEntity = await this.userRepository.readById(createUserDTO.id);
 
-        ExceptionUtil.check(!CheckerUtil.isDefined(userEntity), `${createUserDTO.id} is already exist!`);
+        ExceptionUtil.check(
+            CheckerUtil.isDefined(userEntity),
+            `${createUserDTO.id} is already exist!`,
+            HttpStatus.CONFLICT
+        );
 
         createUserDTO.password = await CommonUtil.generateHash(createUserDTO.password);
 
@@ -69,7 +73,7 @@ export class UserService {
      * id값을 매개변수로 받아 일치하는 유저의 정보를 리턴시키도록 한다.
      */
     async detailUser(accessToken: string): Promise<UserEntity> {
-        ExceptionUtil.check(isJWT(accessToken), 'Wrong token');
+        ExceptionUtil.check(!isJWT(accessToken), 'Unauthorized, Please log in again', HttpStatus.UNAUTHORIZED);
 
         const accessTokenPayload = await this.authService.verifyAccessToken(accessToken);
 
@@ -81,7 +85,7 @@ export class UserService {
      * DTO 안의 Optinal 필드값 참고
      */
     async updateUser(updateUserDTO: UpdateUserDTO, accessToken: string): Promise<UserEntity> {
-        ExceptionUtil.check(isJWT(accessToken), 'Wrong token');
+        ExceptionUtil.check(!isJWT(accessToken), 'Unauthorized, Please log in again', HttpStatus.UNAUTHORIZED);
 
         const accessTokenPayload = await this.authService.verifyAccessToken(accessToken);
 
@@ -102,20 +106,28 @@ export class UserService {
         const message = 'Invalid authentication. Please login again.';
 
         // 리프레시가 JWT 토큰은 맞는지?
-        ExceptionUtil.check(isJWT(tokens['refreshToken']), message);
+        ExceptionUtil.check(!isJWT(tokens['refreshToken']), message, HttpStatus.UNAUTHORIZED);
 
         const payload = await this.authService.verifyRefreshToken(tokens['refreshToken']);
 
         // 넘어온 리프레시에 들어있는 액세스와 현재 액세스가 일치하는지?
-        ExceptionUtil.check(CheckerUtil.isEquals(tokens['accessToken'], payload.accessToken), message);
+        ExceptionUtil.check(
+            !CheckerUtil.isEquals(tokens['accessToken'], payload.accessToken),
+            message,
+            HttpStatus.UNAUTHORIZED
+        );
 
         const redisToken = await this.redisTokenService.getToken(payload.user_no);
 
         // 레디스에 해당 user_no의 리프레시가 들어는지?
-        ExceptionUtil.check(CheckerUtil.isNotNull(redisToken), message);
+        ExceptionUtil.check(CheckerUtil.isNull(redisToken), message, HttpStatus.UNAUTHORIZED);
 
         // 넘어온 리프레시가 레디스의 리프레시와 일치하는지?
-        ExceptionUtil.check(CheckerUtil.isEquals(tokens['refreshToken'], redisToken), message);
+        ExceptionUtil.check(
+            !CheckerUtil.isEquals(tokens['refreshToken'], redisToken),
+            message,
+            HttpStatus.UNAUTHORIZED
+        );
 
         const newAccessToken = await this.authService.generateAccessToken({
             user_no: payload.user_no,

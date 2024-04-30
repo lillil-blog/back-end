@@ -17,8 +17,6 @@ export class RootService {
 
         const props = Object.assign({ users: userEntities }, { boards: boardEntities });
 
-        console.log(props);
-
         return props;
     }
 }
